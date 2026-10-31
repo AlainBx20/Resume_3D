@@ -18,6 +18,7 @@ import Rain from "./Rain";
 import Snow from "./Snow";
 import LightningBolt from "./LightningBolt";
 import Fireflies from "./Fireflies";
+import Butterflies from "./Butterflies";
 import { buildings } from "../content";
 
 function PlazaGarden() {
@@ -67,6 +68,7 @@ export default function Outdoor() {
       <Snow />
       <LightningBolt />
       <Fireflies />
+      <Butterflies />
       {buildings.map((def) => (
         <Building key={def.id} def={def} />
       ))}
