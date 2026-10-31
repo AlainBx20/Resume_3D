@@ -6,7 +6,7 @@ import Ground from "./Ground";
 import GroundFlora from "./GroundFlora";
 import GrassField from "./GrassField";
 import InstancedTrees from "./InstancedTrees";
-import Mountains from "./Mountains";
+import MountainRange from "./MountainRange";
 import Pathways from "./Pathways";
 import CityProps from "./CityProps";
 import Building from "./Building";
@@ -51,7 +51,7 @@ export default function Outdoor() {
     <>
       <SkyAtmosphere />
       <SkyLife />
-      <Mountains />
+      <MountainRange />
       <Ground />
       <GroundFlora />
       <GrassField />
