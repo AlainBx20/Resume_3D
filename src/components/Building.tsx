@@ -13,8 +13,9 @@ export default function Building({ def }: { def: BuildingDef }) {
   const groupRef = useRef<THREE.Group>(null);
   const beaconRef = useRef<THREE.Mesh>(null);
   const windowLightRef = useRef<THREE.PointLight>(null);
-  // face the plaza at the origin, regardless of where the building is placed
-  const facingY = Math.atan2(def.position[0], def.position[2]);
+  // face the plaza at the origin, regardless of where the building is placed;
+  // +PI brings the KayKit storefront (local +Z) around toward the plaza
+  const facingY = Math.atan2(def.position[0], def.position[2]) + Math.PI;
   // measured from the building's real world bounding box once it's mounted,
   // so the beacon/label sit just above the actual roof instead of a guessed height
   const [roofTop, setRoofTop] = useState(4 * def.scale);
@@ -54,7 +55,8 @@ export default function Building({ def }: { def: BuildingDef }) {
   return (
     <>
       <group ref={groupRef} position={def.position} rotation-y={facingY} scale={def.scale}>
-        <primitive object={clone} />
+        {/* KayKit buildings have their lowest geometry at y≈0.1 (local); seat them on the ground */}
+        <primitive object={clone} position-y={-0.1} />
         <pointLight ref={windowLightRef} position={[0, 2.2, 1.6]} color="#ffcf87" intensity={1.6} distance={14} decay={2} />
       </group>
 

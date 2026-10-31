@@ -10,4 +10,6 @@ License: CC0 1.0 (Creative Commons Zero / Public Domain). Free for personal, edu
 
 - **Fountain** (`public/models/decor/fountain.glb`) by Isa Lousberg, via Poly Pizza — https://poly.pizza/m/WHc7dwttlk — Public Domain (CC0), no attribution required.
 
+- **KayKit** by Kay Lousberg (`public/models/kaykit/`) — City Builder Bits (buildings) and Furniture Bits (interior furniture) — https://kaylousberg.com / https://github.com/KayKit-Game-Assets — CC0 1.0. Converted from glTF to self-contained, quantized `.glb` with gltf-transform.
+
 - **Kenney Pixel font** (`public/fonts/kenpixel.ttf`) from the three.js examples package, by Kenney — CC0.
