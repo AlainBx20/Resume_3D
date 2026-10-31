@@ -8,6 +8,7 @@ import GrassField from "./GrassField";
 import InstancedTrees from "./InstancedTrees";
 import Mountains from "./Mountains";
 import Pathways from "./Pathways";
+import CityProps from "./CityProps";
 import Building from "./Building";
 import ChimneySmoke from "./ChimneySmoke";
 import Fountain from "./Fountain";
@@ -72,6 +73,7 @@ export default function Outdoor() {
       <GrassField />
       <InstancedTrees />
       <Pathways />
+      <CityProps />
       <PlazaGarden />
       <Fountain />
       <ChimneySmoke />
