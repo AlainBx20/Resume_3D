@@ -87,4 +87,7 @@ stores (`src/store.ts`, `src/weatherStore.ts`).
 
 The current experience has no runtime asset-CDN dependency: models, textures,
 the world font, HDR lighting, and procedural effects are all served locally.
-3D assets are Kenney CC0 model packs (see `CREDITS.md`).
+3D assets are Kenney CC0 model packs (see `CREDITS.md`), compressed with
+gltf-transform `KHR_mesh_quantization` (~40% smaller, and read natively by
+GLTFLoader with no decoder to ship). The two instanced tree models are left
+unquantized because `InstancedTrees` reuses their raw geometry directly.
