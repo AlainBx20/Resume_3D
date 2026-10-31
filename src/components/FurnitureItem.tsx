@@ -42,7 +42,7 @@ export default function FurnitureItem({ def }: { def: FurnitureItemDef }) {
   }, []);
 
   return (
-    <group ref={groupRef} position={def.position} rotation-y={def.rotationY ?? 0} scale={EXHIBIT_SCALE}>
+    <group ref={groupRef} position={def.position} rotation-y={def.rotationY ?? 0} scale={def.scale ?? EXHIBIT_SCALE}>
       <primitive object={clone} />
     </group>
   );
