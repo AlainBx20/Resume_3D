@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useProgress } from "@react-three/drei";
-import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 import Scene from "./components/Scene";
 import HUD from "./components/HUD";
@@ -45,10 +44,8 @@ function App() {
       >
         <Suspense fallback={null}>
           <Scene />
-          <EffectComposer multisampling={0}>
-            <Bloom intensity={0.35} luminanceThreshold={0.72} luminanceSmoothing={0.3} mipmapBlur />
-            <Vignette eskil={false} offset={0.18} darkness={0.48} />
-          </EffectComposer>
+          {/* Post-processing (bloom + vignette) is reintroduced in Phase 4 as a
+              TSL PostProcessing node pipeline once the renderer is WebGPU. */}
         </Suspense>
       </Canvas>
       <LoadingStatus />
