@@ -1,14 +1,14 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { MeshStandardNodeMaterial } from "three/webgpu";
+import { MeshBasicNodeMaterial } from "three/webgpu";
 import { attribute, uniform, time, positionLocal, positionGeometry, vec3, sin, mix, color } from "three/tsl";
 import { buildings } from "../content";
 import { atm } from "../atmosphere";
 import { mulberry32 } from "../rand";
 import { GROUND_RADIUS, PLAZA_RADIUS } from "./Ground";
 
-const BLADE_COUNT = 13000;
+const BLADE_COUNT = 7000;
 const BLADE_HEIGHT = 0.52;
 
 // module-scope wind uniform (one grass field), driven once per frame
@@ -57,11 +57,11 @@ export default function GrassField() {
     const lean = heightFrac.mul(heightFrac);
     const sway = sin(time.mul(1.5).add(phase)).mul(uGrassWind.mul(0.22).add(0.05));
 
-    const material = new MeshStandardNodeMaterial();
+    // unlit basic material: thousands of lit blades were the perf hit. The
+    // vertical gradient (dark root -> bright tip) fakes enough light/depth.
+    const material = new MeshBasicNodeMaterial();
     material.positionNode = positionLocal.add(vec3(sway.mul(lean), 0, sway.mul(0.4).mul(lean)));
-    material.colorNode = mix(color("#3f6e34"), color("#86b35a"), heightFrac).mul(tint);
-    material.roughness = 0.9;
-    material.metalness = 0;
+    material.colorNode = mix(color("#35602c"), color("#8cba5e"), heightFrac).mul(tint);
     material.side = THREE.DoubleSide;
     return material;
   }, []);
@@ -116,7 +116,6 @@ export default function GrassField() {
     <instancedMesh
       ref={meshRef}
       args={[geometry, material, BLADE_COUNT]}
-      receiveShadow
       frustumCulled={false}
     />
   );

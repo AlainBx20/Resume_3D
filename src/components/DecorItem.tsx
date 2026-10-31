@@ -30,7 +30,7 @@ export default function DecorItem({ def }: { def: DecorItemDef }) {
     if (!group) return;
     group.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(group);
-    box.expandByScalar(0.1);
+    box.expandByScalar(0.03);
     return registerCollider(box);
   }, [def.noCollide]);
 

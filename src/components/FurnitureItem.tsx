@@ -37,7 +37,7 @@ export default function FurnitureItem({ def }: { def: FurnitureItemDef }) {
     // measured from the real model bounds so the collider hugs each prop's
     // actual footprint instead of a guessed size
     const box = new THREE.Box3().setFromObject(group);
-    box.expandByScalar(0.15);
+    box.expandByScalar(0.05);
     return registerCollider(box);
   }, []);
 

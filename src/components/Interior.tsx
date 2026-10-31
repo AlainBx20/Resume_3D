@@ -6,6 +6,7 @@ import { useTownStore, type InteriorItem } from "../store";
 import FurnitureItem from "./FurnitureItem";
 import DecorItem from "./DecorItem";
 import WorldText from "./WorldText";
+import Doorway from "./Doorway";
 
 const ROOM_WIDTH = 10;
 const ROOM_DEPTH = 8;
@@ -217,6 +218,9 @@ export default function Interior({ id }: { id: SectionId }) {
         <ringGeometry args={[0.5, 0.7, 24]} />
         <meshBasicMaterial color="#ffffff" transparent opacity={0.5} toneMapped={false} />
       </mesh>
+
+      {/* real door filling the exit opening (was a black void) */}
+      <Doorway wallColor={wallColor} />
 
       {decor.map((it, i) => (
         <DecorItem key={`decor-${id}-${i}`} def={it} />

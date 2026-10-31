@@ -44,6 +44,9 @@ export default function Player() {
   useEffect(() => {
     camera.position.set(0, EYE_HEIGHT, 8);
     camera.lookAt(0, EYE_HEIGHT, -11);
+    if (import.meta.env.DEV) {
+      (window as unknown as { __camera: THREE.Camera }).__camera = camera;
+    }
   }, [camera]);
 
   // teleport on house enter/exit, after React has committed the swapped
@@ -162,14 +165,15 @@ export default function Player() {
     const tryAxis = (move: () => void) => {
       const prevX = cam.position.x;
       const prevZ = cam.position.z;
+      // if already inside a collider (clipped in somehow), never block the move —
+      // otherwise every small step stays inside and reverts, trapping the player
+      const wasStuck = collidesAt(prevX, prevZ);
       move();
       const { x, z } = cam.position;
-      if (insideId) {
-        if (Math.abs(x) > ROOM_BOUND_X || Math.abs(z) > ROOM_BOUND_Z || collidesAt(x, z)) {
-          cam.position.x = prevX;
-          cam.position.z = prevZ;
-        }
-      } else if (collidesAt(x, z) || Math.hypot(x, z) > TOWN_RADIUS) {
+      const outOfBounds = insideId
+        ? Math.abs(x) > ROOM_BOUND_X || Math.abs(z) > ROOM_BOUND_Z
+        : Math.hypot(x, z) > TOWN_RADIUS;
+      if (outOfBounds || (!wasStuck && collidesAt(x, z))) {
         cam.position.x = prevX;
         cam.position.z = prevZ;
       }
