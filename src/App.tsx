@@ -3,6 +3,7 @@ import { Canvas, extend } from "@react-three/fiber";
 import { useProgress } from "@react-three/drei";
 import * as THREE from "three/webgpu";
 import Scene from "./components/Scene";
+import Post from "./components/Post";
 import HUD from "./components/HUD";
 import SectionPanel from "./components/SectionPanel";
 import "./App.css";
@@ -57,8 +58,7 @@ function App() {
       >
         <Suspense fallback={null}>
           <Scene />
-          {/* Post-processing (bloom + vignette) is reintroduced in Phase 4 as a
-              TSL PostProcessing node pipeline once the renderer is WebGPU. */}
+          <Post />
         </Suspense>
       </Canvas>
       <LoadingStatus />
