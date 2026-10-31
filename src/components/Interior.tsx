@@ -7,6 +7,7 @@ import FurnitureItem from "./FurnitureItem";
 import DecorItem from "./DecorItem";
 import WorldText from "./WorldText";
 import Doorway from "./Doorway";
+import WindowGlass from "./WindowGlass";
 
 const ROOM_WIDTH = 10;
 const ROOM_DEPTH = 8;
@@ -33,13 +34,13 @@ function InteractionMarker({ item, color }: { item: InteriorItem; color: string 
         <ringGeometry args={[0.42, 0.52, 32]} />
         <meshBasicMaterial color={color} transparent opacity={0.5} depthWrite={false} toneMapped={false} />
       </mesh>
-      <Billboard position={[0, 1.05, 0]}>
+      <Billboard position={[0, 1.7, 0]}>
         <WorldText
-          fontSize={0.115}
-          maxWidth={1.9}
+          fontSize={0.13}
+          maxWidth={3.2}
           textAlign="center"
           color="#ffffff"
-          outlineWidth={0.015}
+          outlineWidth={0.016}
           outlineColor="#111827"
         >
           {item.label}
@@ -78,10 +79,9 @@ function Window({ position, rotationY }: { position: [number, number, number]; r
         <boxGeometry args={[1.5, 1.15, 0.06]} />
         <meshStandardMaterial color={WOOD} roughness={0.85} />
       </mesh>
-      <mesh position={[0, 0, 0.035]}>
-        <planeGeometry args={[1.3, 0.95]} />
-        <meshStandardMaterial color="#cfe4f6" emissive="#a9c9e8" emissiveIntensity={0.65} roughness={0.2} />
-      </mesh>
+      <group position={[0, 0, 0.035]}>
+        <WindowGlass />
+      </group>
       {/* cross mullions */}
       <mesh position={[0, 0, 0.05]}>
         <boxGeometry args={[0.05, 0.95, 0.02]} />
