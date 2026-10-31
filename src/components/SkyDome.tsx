@@ -1,63 +1,47 @@
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { MeshBasicNodeMaterial } from "three/webgpu";
+import { uniform, positionLocal, mix, color } from "three/tsl";
 import { atm } from "../atmosphere";
 
 const RADIUS = 280;
 
-// Gradient dome driven by uniforms so WeatherSystem can repaint the whole sky
-// every frame (day/night cycle, overcast grey, lightning flash) for free.
-export default function SkyDome() {
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
+// Uniform nodes at module scope (one dome in the scene) so WeatherSystem can
+// repaint the whole sky every frame from useFrame without the linter flagging
+// mutation of a memoized value.
+const uHorizon = uniform(new THREE.Color("#f0ad7c"));
+const uZenith = uniform(new THREE.Color("#6f7bb8"));
+const uFlash = uniform(0);
 
-  const shaderArgs = useMemo(
-    () => ({
-      uniforms: {
-        uHorizon: { value: new THREE.Color("#f0ad7c") },
-        uZenith: { value: new THREE.Color("#6f7bb8") },
-        uFlash: { value: 0 },
-      },
-      vertexShader: /* glsl */ `
-        varying float vHeight;
-        void main() {
-          vHeight = position.y / ${RADIUS.toFixed(1)};
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: /* glsl */ `
-        uniform vec3 uHorizon;
-        uniform vec3 uZenith;
-        uniform float uFlash;
-        varying float vHeight;
-        void main() {
-          float t = clamp(vHeight + 0.1, 0.0, 1.0);
-          vec3 color = mix(uHorizon, uZenith, t);
-          color = mix(color, vec3(0.95, 0.96, 1.0), uFlash * 0.7);
-          gl_FragColor = vec4(color, 1.0);
-        }
-      `,
-    }),
-    []
-  );
+// Gradient dome driven by the uniform nodes above (day/night cycle, overcast
+// grey, lightning flash). Ported from a GLSL ShaderMaterial to a TSL node
+// material for WebGPURenderer.
+export default function SkyDome() {
+  const material = useMemo(() => {
+    const t = positionLocal.y.div(RADIUS).add(0.1).clamp(0, 1);
+    const gradient = mix(uHorizon, uZenith, t);
+    const flashed = mix(gradient, color(0.95, 0.96, 1.0), uFlash.mul(0.7));
+
+    const material = new MeshBasicNodeMaterial();
+    material.colorNode = flashed;
+    material.side = THREE.BackSide;
+    material.depthWrite = false;
+    material.fog = false;
+    material.toneMapped = false; // flat gradient sky, matching the original raw write
+    return material;
+  }, []);
 
   useFrame(() => {
-    const material = materialRef.current;
-    if (!material) return;
-    (material.uniforms.uHorizon.value as THREE.Color).copy(atm.skyHorizon);
-    (material.uniforms.uZenith.value as THREE.Color).copy(atm.skyZenith);
-    material.uniforms.uFlash.value = atm.flash;
+    (uHorizon.value as THREE.Color).copy(atm.skyHorizon);
+    (uZenith.value as THREE.Color).copy(atm.skyZenith);
+    uFlash.value = atm.flash;
   });
 
   return (
     <mesh renderOrder={-2}>
       <sphereGeometry args={[RADIUS, 32, 20]} />
-      <shaderMaterial
-        ref={materialRef}
-        args={[shaderArgs]}
-        side={THREE.BackSide}
-        depthWrite={false}
-        fog={false}
-      />
+      <primitive object={material} attach="material" />
     </mesh>
   );
 }

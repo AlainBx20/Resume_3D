@@ -1,70 +1,58 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { MeshBasicNodeMaterial } from "three/webgpu";
+import { Fn, uniform, positionLocal, length, vec3, mod, clamp, min, smoothstep, float } from "three/tsl";
 import { atm } from "../atmosphere";
 
 const INNER = 52;
 const OUTER = 64;
 
+// module-scope uniform (one rainbow in the scene) so useFrame can drive it
+const uOpacity = uniform(0);
+
 // A shader arc that fades in only when the ground is still wet, the sky has
 // cleared and the sun is up — the reward for waiting out a storm.
+// Ported from GLSL to a TSL node material for WebGPURenderer.
 export default function Rainbow() {
   const meshRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
 
-  const shaderArgs = useMemo(
-    () => ({
-      uniforms: { uOpacity: { value: 0 } },
-      vertexShader: /* glsl */ `
-        varying vec2 vPos;
-        void main() {
-          vPos = position.xy;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: /* glsl */ `
-        uniform float uOpacity;
-        varying vec2 vPos;
+  const material = useMemo(() => {
+    const r = length(positionLocal.xy).sub(INNER).div(OUTER - INNER);
 
-        vec3 hue2rgb(float h) {
-          vec3 k = mod(vec3(0.0, 4.0, 2.0) + h * 6.0, 6.0);
-          return 1.0 - clamp(min(k, 4.0 - k), 0.0, 1.0);
-        }
+    const material = new MeshBasicNodeMaterial();
+    material.colorNode = Fn(() => {
+      r.lessThan(0).or(r.greaterThan(1)).discard();
+      // hue2rgb inline: red on the outside, violet inside
+      const h = float(1).sub(r).mul(0.78);
+      const k = mod(vec3(0, 4, 2).add(h.mul(6)), 6);
+      return float(1).sub(clamp(min(k, float(4).sub(k)), 0, 1));
+    })();
+    // soft band edges, fading with wetness/clearing opacity
+    const edge = smoothstep(0, 0.18, r).mul(smoothstep(1, 0.82, r));
+    material.opacityNode = uOpacity.mul(edge).mul(0.5);
+    material.transparent = true;
+    material.depthWrite = false;
+    material.side = THREE.DoubleSide;
+    material.blending = THREE.AdditiveBlending;
+    material.toneMapped = false;
 
-        void main() {
-          float r = (length(vPos) - ${INNER.toFixed(1)}) / ${(OUTER - INNER).toFixed(1)};
-          if (r < 0.0 || r > 1.0) discard;
-          // red on the outside, violet inside, soft band edges
-          vec3 color = hue2rgb((1.0 - r) * 0.78);
-          float edge = smoothstep(0.0, 0.18, r) * smoothstep(1.0, 0.82, r);
-          gl_FragColor = vec4(color, uOpacity * edge * 0.5);
-        }
-      `,
-    }),
-    []
-  );
+    return material;
+  }, []);
 
   useFrame(() => {
     const mesh = meshRef.current;
-    const material = materialRef.current;
-    if (!mesh || !material) return;
+    if (!mesh) return;
     const clearing = THREE.MathUtils.clamp(1 - atm.rain * 6, 0, 1);
     const opacity = atm.wetness * atm.day * clearing * (1 - atm.overcast);
-    material.uniforms.uOpacity.value = opacity;
+    uOpacity.value = opacity;
     mesh.visible = opacity > 0.02;
   });
 
   return (
     <mesh ref={meshRef} position={[0, -6, -150]}>
       <ringGeometry args={[INNER, OUTER, 72, 1, 0, Math.PI]} />
-      <shaderMaterial
-        ref={materialRef}
-        args={[shaderArgs]}
-        transparent
-        depthWrite={false}
-        side={THREE.DoubleSide}
-        blending={THREE.AdditiveBlending}
-      />
+      <primitive object={material} attach="material" />
     </mesh>
   );
 }

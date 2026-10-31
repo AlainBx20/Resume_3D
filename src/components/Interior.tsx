@@ -1,10 +1,11 @@
 import { useEffect, useMemo } from "react";
-import { Billboard, Text, useGLTF } from "@react-three/drei";
+import { Billboard, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { buildings, interiorLayouts, interiorDecor, WORLD_FONT, type SectionId } from "../content";
+import { buildings, interiorLayouts, interiorDecor, type SectionId } from "../content";
 import { useTownStore, type InteriorItem } from "../store";
 import FurnitureItem from "./FurnitureItem";
 import DecorItem from "./DecorItem";
+import WorldText from "./WorldText";
 
 const ROOM_WIDTH = 10;
 const ROOM_DEPTH = 8;
@@ -32,19 +33,16 @@ function InteractionMarker({ item, color }: { item: InteriorItem; color: string 
         <meshBasicMaterial color={color} transparent opacity={0.5} depthWrite={false} toneMapped={false} />
       </mesh>
       <Billboard position={[0, 1.05, 0]}>
-        <Text
-          font={WORLD_FONT}
+        <WorldText
           fontSize={0.115}
           maxWidth={1.9}
           textAlign="center"
           color="#ffffff"
           outlineWidth={0.015}
           outlineColor="#111827"
-          anchorX="center"
-          anchorY="middle"
         >
           {item.label}
-        </Text>
+        </WorldText>
       </Billboard>
     </group>
   );
@@ -172,28 +170,22 @@ export default function Interior({ id }: { id: SectionId }) {
         <meshStandardMaterial color={theme.trim} roughness={0.8} />
       </mesh>
 
-      <Text
-        font={WORLD_FONT}
+      <WorldText
         position={[0, 3.3, -ROOM_DEPTH / 2 + 0.13]}
         fontSize={0.5}
         color={def.color}
         outlineWidth={0.012}
         outlineColor="#ffffff"
-        anchorX="center"
-        anchorY="middle"
       >
         {def.title}
-      </Text>
-      <Text
-        font={WORLD_FONT}
+      </WorldText>
+      <WorldText
         position={[0, 2.88, -ROOM_DEPTH / 2 + 0.135]}
         fontSize={0.16}
         color="#5d6470"
-        anchorX="center"
-        anchorY="middle"
       >
         {def.subtitle}
-      </Text>
+      </WorldText>
 
       {/* east / west walls */}
       <mesh position={[ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 0]} receiveShadow>

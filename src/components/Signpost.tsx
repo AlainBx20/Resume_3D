@@ -1,9 +1,9 @@
 import { useEffect, useMemo } from "react";
-import { Text } from "@react-three/drei";
 import * as THREE from "three";
-import { TOWN_NAME, WORLD_FONT } from "../content";
+import { TOWN_NAME } from "../content";
 import { registerCollider } from "../collision";
 import { mulberry32 } from "../rand";
+import WorldText from "./WorldText";
 
 // Off the right shoulder of the walking path, a few steps ahead of spawn
 const POSITION: [number, number, number] = [3.8, 0, 2.4];
@@ -48,24 +48,21 @@ function SignFace({ back = false }: { back?: boolean }) {
   const flip = back ? Math.PI : 0;
   return (
     <group position={[0, BOARD_BASE_Y, 0]} rotation-y={flip}>
-      <Text font={WORLD_FONT} position={[0, 0.76, back ? -z : z]} fontSize={0.14} color={GOLD} anchorX="center" anchorY="middle">
+      <WorldText position={[0, 0.76, back ? -z : z]} fontSize={0.14} color={GOLD}>
         Welcome to
-      </Text>
-      <Text
-        font={WORLD_FONT}
+      </WorldText>
+      <WorldText
         position={[0, 0.47, back ? -z : z]}
         fontSize={0.28}
         maxWidth={BOARD_WIDTH - 0.3}
         textAlign="center"
         color={GOLD}
-        anchorX="center"
-        anchorY="middle"
       >
         {TOWN_NAME}
-      </Text>
-      <Text font={WORLD_FONT} position={[0, 0.18, back ? -z : z]} fontSize={0.1} color={GOLD} anchorX="center" anchorY="middle">
+      </WorldText>
+      <WorldText position={[0, 0.18, back ? -z : z]} fontSize={0.1} color={GOLD}>
         Built with Three.js
-      </Text>
+      </WorldText>
     </group>
   );
 }

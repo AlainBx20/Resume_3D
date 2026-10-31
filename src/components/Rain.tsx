@@ -1,6 +1,8 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { LineBasicNodeMaterial } from "three/webgpu";
+import { attribute, uniform, time, positionLocal, vec3, mod, color } from "three/tsl";
 import { atm } from "../atmosphere";
 import { mulberry32 } from "../rand";
 
@@ -14,9 +16,12 @@ const SPLASH_CYCLE = 0.55;
 // Rain streaks are static line segments whose fall is entirely a vertex
 // shader offset (mod over time), so the whole system costs one draw call and
 // zero per-frame CPU work. The rig follows the camera on x/z.
+// module-scope uniforms (one rain rig) so useFrame can drive them
+const uRainOpacity = uniform(0);
+const uRainWind = uniform(0);
+
 function RainStreaks() {
   const groupRef = useRef<THREE.Group>(null);
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
 
   const geometry = useMemo(() => {
     const rng = mulberry32(101);
@@ -48,43 +53,30 @@ function RainStreaks() {
     return geo;
   }, []);
 
-  const shaderArgs = useMemo(
-    () => ({
-      uniforms: {
-        uTime: { value: 0 },
-        uOpacity: { value: 0 },
-        uWind: { value: 0 },
-      },
-      vertexShader: /* glsl */ `
-        attribute float aSeed;
-        attribute float aTip;
-        uniform float uTime;
-        uniform float uWind;
-        void main() {
-          vec3 p = position;
-          float y = mod(aSeed - uTime * 16.0, ${FALL_HEIGHT.toFixed(1)});
-          p.y = y + aTip * ${DROP_LENGTH.toFixed(2)};
-          p.x += uWind * (aTip * ${DROP_LENGTH.toFixed(2)} * 2.0 + y * 0.06);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
-        }
-      `,
-      fragmentShader: /* glsl */ `
-        uniform float uOpacity;
-        void main() {
-          gl_FragColor = vec4(0.62, 0.71, 0.85, uOpacity);
-        }
-      `,
-    }),
-    []
-  );
+  const material = useMemo(() => {
+    const aSeed = attribute("aSeed", "float");
+    const aTip = attribute("aTip", "float");
+
+    // falling streak entirely on the GPU: mod over the self-updating time node
+    const y = mod(aSeed.sub(time.mul(16.0)), FALL_HEIGHT);
+    const px = positionLocal.x.add(uRainWind.mul(aTip.mul(DROP_LENGTH * 2.0).add(y.mul(0.06))));
+    const py = y.add(aTip.mul(DROP_LENGTH));
+
+    const material = new LineBasicNodeMaterial();
+    material.positionNode = vec3(px, py, positionLocal.z);
+    material.colorNode = color(0.62, 0.71, 0.85);
+    material.opacityNode = uRainOpacity;
+    material.transparent = true;
+    material.depthWrite = false;
+    material.toneMapped = false;
+    return material;
+  }, []);
 
   useFrame((state) => {
     const group = groupRef.current;
-    const material = materialRef.current;
-    if (!group || !material) return;
-    material.uniforms.uTime.value = state.clock.elapsedTime;
-    material.uniforms.uOpacity.value = atm.rain * 0.55;
-    material.uniforms.uWind.value = atm.wind * 0.7;
+    if (!group) return;
+    uRainOpacity.value = atm.rain * 0.55;
+    uRainWind.value = atm.wind * 0.7;
     group.visible = atm.rain > 0.02;
     group.position.set(state.camera.position.x, 0, state.camera.position.z);
   });
@@ -92,7 +84,7 @@ function RainStreaks() {
   return (
     <group ref={groupRef} visible={false}>
       <lineSegments geometry={geometry}>
-        <shaderMaterial ref={materialRef} args={[shaderArgs]} transparent depthWrite={false} />
+        <primitive object={material} attach="material" />
       </lineSegments>
     </group>
   );

@@ -2,6 +2,8 @@ import { useMemo, useRef, useLayoutEffect } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { MeshStandardNodeMaterial } from "three/webgpu";
+import { attribute, uniform, time, positionLocal, positionGeometry, vec3, sin, fract, smoothstep } from "three/tsl";
 import { buildings } from "../content";
 import { atm } from "../atmosphere";
 import { mulberry32 } from "../rand";
@@ -10,9 +12,9 @@ import { GROUND_RADIUS } from "./Ground";
 const TREE_LARGE = "/models/suburban/tree-large.glb";
 const TREE_SMALL = "/models/suburban/tree-small.glb";
 
-// shared across both tree materials, updated once per frame
-const uTime = { value: 0 };
-const uWind = { value: 0.25 };
+// shared wind uniform across both tree materials, updated once per frame;
+// the time node updates itself
+const uWind = uniform(0.25);
 
 interface Placement {
   position: [number, number, number];
@@ -76,37 +78,46 @@ function InstancedTreeModel({ url, placements }: { url: string; placements: Plac
 
   const { geometry, material } = useMemo(() => {
     let geometry: THREE.BufferGeometry | null = null;
-    let source: THREE.Material | null = null;
+    let source: THREE.MeshStandardMaterial | null = null;
     scene.traverse((obj) => {
       const mesh = obj as THREE.Mesh;
       if (mesh.isMesh && !geometry) {
         geometry = mesh.geometry;
-        source = mesh.material as THREE.Material;
+        source = mesh.material as THREE.MeshStandardMaterial;
       }
     });
-    const material = (source as unknown as THREE.MeshStandardMaterial).clone();
-    // wind sway in the vertex shader: bend increases with height so trunks
-    // stay planted while canopies lean with the current wind strength
-    material.onBeforeCompile = (shader) => {
-      shader.uniforms.uTime = uTime;
-      shader.uniforms.uWind = uWind;
-      shader.vertexShader = shader.vertexShader
-        .replace(
-          "#include <common>",
-          `#include <common>
-          attribute float aPhase;
-          uniform float uTime;
-          uniform float uWind;`
-        )
-        .replace(
-          "#include <begin_vertex>",
-          `#include <begin_vertex>
-          float swayHeight = smoothstep(0.15, 0.75, transformed.y);
-          float sway = sin(uTime * (0.8 + fract(aPhase) * 0.5) + aPhase) * (0.025 + uWind * 0.075);
-          transformed.x += sway * swayHeight;
-          transformed.z += sway * 0.6 * swayHeight;`
-        );
-    };
+
+    // Rebuild the GLTF material as a node material so WebGPURenderer can drive
+    // the wind sway through positionNode (onBeforeCompile never runs on WebGPU).
+    const src = source as unknown as THREE.MeshStandardMaterial;
+    const material = new MeshStandardNodeMaterial();
+    material.color.copy(src.color);
+    material.map = src.map;
+    material.roughness = src.roughness;
+    material.metalness = src.metalness;
+    material.vertexColors = src.vertexColors;
+    material.flatShading = src.flatShading;
+    material.transparent = src.transparent;
+    material.opacity = src.opacity;
+    material.alphaTest = src.alphaTest;
+    material.side = src.side;
+    material.normalMap = src.normalMap;
+    material.emissive.copy(src.emissive);
+    material.emissiveMap = src.emissiveMap;
+    material.emissiveIntensity = src.emissiveIntensity;
+    material.aoMap = src.aoMap;
+
+    // Wind sway: bend grows with the tree's object-space height so trunks stay
+    // planted while canopies lean with the current wind strength. The height
+    // mask reads positionGeometry (object space); the offset is applied in
+    // positionLocal (post-instance) and scaled to cover the instance scale.
+    const phase = attribute("aPhase", "float");
+    const swayHeight = smoothstep(0.15, 0.75, positionGeometry.y);
+    const sway = sin(time.mul(fract(phase).mul(0.5).add(0.8)).add(phase)).mul(uWind.mul(0.375).add(0.125));
+    material.positionNode = positionLocal.add(
+      vec3(sway.mul(swayHeight), 0, sway.mul(0.6).mul(swayHeight))
+    );
+
     return { geometry: geometry as unknown as THREE.BufferGeometry, material };
   }, [scene]);
 
@@ -148,8 +159,7 @@ export default function InstancedTrees() {
     [placements]
   );
 
-  useFrame((state) => {
-    uTime.value = state.clock.elapsedTime;
+  useFrame(() => {
     uWind.value = atm.wind;
   });
 

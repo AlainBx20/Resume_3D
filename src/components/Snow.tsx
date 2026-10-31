@@ -1,6 +1,8 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { PointsNodeMaterial } from "three/webgpu";
+import { attribute, uniform, time, positionLocal, positionView, vec3, mod, sin, cos, color } from "three/tsl";
 import { atm } from "../atmosphere";
 import { mulberry32 } from "../rand";
 
@@ -8,28 +10,15 @@ const FLAKE_COUNT = 1100;
 const AREA_RADIUS = 28;
 const FALL_HEIGHT = 20;
 
-function makeFlakeTexture(): THREE.Texture {
-  const size = 32;
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext("2d")!;
-  const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  gradient.addColorStop(0, "rgba(255,255,255,1)");
-  gradient.addColorStop(0.5, "rgba(255,255,255,0.7)");
-  gradient.addColorStop(1, "rgba(255,255,255,0)");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, size, size);
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
-}
+// module-scope uniforms (one snow rig) so useFrame can drive them
+const uSnowOpacity = uniform(0);
+const uSnowWind = uniform(0);
 
 // Same trick as the rain: falling and side-to-side drift both live in the
-// vertex shader, so the flurry is a single static draw call following the
-// camera.
+// position node, so the flurry is a single static draw call following the
+// camera. Ported from GLSL points to a TSL PointsNodeMaterial for WebGPU.
 export default function Snow() {
   const groupRef = useRef<THREE.Group>(null);
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
 
   const geometry = useMemo(() => {
     const rng = mulberry32(303);
@@ -58,49 +47,37 @@ export default function Snow() {
     return geo;
   }, []);
 
-  const shaderArgs = useMemo(
-    () => ({
-      uniforms: {
-        uTime: { value: 0 },
-        uOpacity: { value: 0 },
-        uWind: { value: 0 },
-        uMap: { value: makeFlakeTexture() },
-      },
-      vertexShader: /* glsl */ `
-        attribute float aSeed;
-        attribute float aPhase;
-        attribute float aSize;
-        uniform float uTime;
-        uniform float uWind;
-        void main() {
-          vec3 p = position;
-          p.y = mod(aSeed - uTime * 1.6, ${FALL_HEIGHT.toFixed(1)});
-          p.x += sin(uTime * 0.7 + aPhase) * (0.7 + uWind * 1.6) + uWind * p.y * 0.12;
-          p.z += cos(uTime * 0.5 + aPhase * 1.3) * 0.6;
-          vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
-          gl_PointSize = aSize * 130.0 / -mvPosition.z;
-          gl_Position = projectionMatrix * mvPosition;
-        }
-      `,
-      fragmentShader: /* glsl */ `
-        uniform float uOpacity;
-        uniform sampler2D uMap;
-        void main() {
-          vec4 tex = texture2D(uMap, gl_PointCoord);
-          gl_FragColor = vec4(0.95, 0.97, 1.0, tex.a * uOpacity);
-        }
-      `,
-    }),
-    []
-  );
+  const material = useMemo(() => {
+    const aSeed = attribute("aSeed", "float");
+    const aPhase = attribute("aPhase", "float");
+    const aSize = attribute("aSize", "float");
+
+    const py = mod(aSeed.sub(time.mul(1.6)), FALL_HEIGHT);
+    const windAmp = uSnowWind.mul(1.6).add(0.7);
+    const px = positionLocal.x
+      .add(sin(time.mul(0.7).add(aPhase)).mul(windAmp))
+      .add(uSnowWind.mul(py).mul(0.12));
+    const pz = positionLocal.z.add(cos(time.mul(0.5).add(aPhase.mul(1.3))).mul(0.6));
+
+    const material = new PointsNodeMaterial();
+    material.positionNode = vec3(px, py, pz);
+    // perspective-attenuated point size, matching gl_PointSize = aSize*130/-mvZ.
+    // WebGPU has no textured point sprites (pointUV compiles to the GLSL-only
+    // gl_PointCoord), so flakes are small solid points instead of soft discs.
+    material.sizeNode = aSize.mul(95.0).div(positionView.z.negate());
+    material.colorNode = color(0.95, 0.97, 1.0);
+    material.opacityNode = uSnowOpacity;
+    material.transparent = true;
+    material.depthWrite = false;
+    material.toneMapped = false;
+    return material;
+  }, []);
 
   useFrame((state) => {
     const group = groupRef.current;
-    const material = materialRef.current;
-    if (!group || !material) return;
-    material.uniforms.uTime.value = state.clock.elapsedTime;
-    material.uniforms.uOpacity.value = atm.snow * 0.9;
-    material.uniforms.uWind.value = atm.wind;
+    if (!group) return;
+    uSnowOpacity.value = atm.snow * 0.9;
+    uSnowWind.value = atm.wind;
     group.visible = atm.snow > 0.02;
     group.position.set(state.camera.position.x, 0, state.camera.position.z);
   });
@@ -108,7 +85,7 @@ export default function Snow() {
   return (
     <group ref={groupRef} visible={false}>
       <points geometry={geometry}>
-        <shaderMaterial ref={materialRef} args={[shaderArgs]} transparent depthWrite={false} />
+        <primitive object={material} attach="material" />
       </points>
     </group>
   );

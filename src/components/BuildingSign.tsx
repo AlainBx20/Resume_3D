@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { Text } from "@react-three/drei";
 import * as THREE from "three";
-import { WORLD_FONT, type BuildingDef } from "../content";
+import { type BuildingDef } from "../content";
+import WorldText from "./WorldText";
 
 const WOOD = "#4e3a28";
 const WOOD_LIGHT = "#6b5138";
@@ -67,20 +67,17 @@ export default function BuildingSign({ def }: { def: BuildingDef }) {
         <meshStandardMaterial color={def.color} emissive={def.color} emissiveIntensity={1.6} toneMapped={false} />
       </mesh>
       {[0, Math.PI].map((flip) => (
-        <Text
+        <WorldText
           key={flip}
-          font={WORLD_FONT}
           position={[0, POST_HEIGHT + PLAQUE_HEIGHT * 0.52, flip === 0 ? 0.065 : -0.065]}
           rotation-y={flip}
           fontSize={0.24}
           maxWidth={PLAQUE_WIDTH - 0.2}
           textAlign="center"
           color={GOLD}
-          anchorX="center"
-          anchorY="middle"
         >
           {def.title}
-        </Text>
+        </WorldText>
       ))}
     </group>
   );
