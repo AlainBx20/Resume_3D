@@ -64,10 +64,11 @@ keyboard, on small screens, and when pointer lock is unavailable.
 
 ## Making it yours
 
-The included Jordan Avery profile is a polished fictional demo. Edit
-**`src/content.ts`** — it holds every name, section, and piece of résumé
-text, plus which furniture props appear inside each building. Nothing else
-needs to change.
+The site is populated with Alaa Ben Chouikha's résumé. Everything lives in
+**`src/content.ts`** — every name, section, and piece of résumé text, plus
+which furniture props appear inside each building, and the label on each
+interactive prop (labels map 1:1 by index to the matching content entries).
+Nothing else needs to change to make it yours.
 
 Tuning knobs live in:
 

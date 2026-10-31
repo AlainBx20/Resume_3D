@@ -38,10 +38,10 @@ export interface DecorItemDef {
   noCollide?: boolean;
 }
 
-export const PLAYER_NAME = "Jordan Avery";
-export const PLAYER_ROLE = "Full-Stack Developer";
-export const TOWN_NAME = `${PLAYER_NAME.split(" ")[0]}ville`;
-export const PROFILE_NOTE = "Interactive demo profile";
+export const PLAYER_NAME = "Alaa Ben Chouikha";
+export const PLAYER_ROLE = "Software Developer";
+export const TOWN_NAME = "Alaaville"; // TODO: swap for the custom town name once chosen
+export const PROFILE_NOTE = "Software Developer @ SMI · Creator of Huda AI";
 export const WORLD_FONT = "/fonts/kenpixel.ttf";
 
 export const buildings: BuildingDef[] = [
@@ -104,9 +104,9 @@ export const buildings: BuildingDef[] = [
 export const aboutContent = {
   heading: "About Me",
   paragraphs: [
-    `Hi, I'm ${PLAYER_NAME} — a ${PLAYER_ROLE.toLowerCase()} who loves turning complex problems into clean, playful experiences.`,
-    "I build thoughtful web products across the stack, from resilient APIs and data models to expressive, accessible interfaces.",
-    "I care about systems that are easy to understand, products that feel good to use, and teams that leave codebases better than they found them.",
+    `Hi, I'm ${PLAYER_NAME} — a software developer at SMI (Société Le Monde Informatique) in Tunis, and the creator of Huda AI, an Islamic AI-powered Q&A platform.`,
+    "By day I build business-oriented banking solutions with Java, Spring Boot, Oracle and microservices; by night I build AI and full-stack projects with React, Angular, Node.js, TensorFlow and PyTorch.",
+    "I care about clean, scalable systems, practical applications that solve real problems, and software that's genuinely a pleasure to use.",
   ],
 };
 
@@ -114,16 +114,23 @@ export const educationContent = {
   heading: "Education",
   entries: [
     {
-      school: "Northbridge University",
-      degree: "B.Sc. in Computer Science",
-      period: "2016 — 2020",
-      details: "Focused on distributed systems, human-computer interaction, and practical software engineering.",
+      school: "Faculty of Sciences of Tunis (FST)",
+      degree: "Bachelor's in Information & Communication Technology",
+      period: "2022 — 2024",
+      details: "ICT fundamentals across software engineering, databases, networks and systems.",
     },
     {
-      school: "Cloud Guild",
-      degree: "Professional Certificate in Cloud Architecture",
-      period: "2021",
-      details: "Designed secure, observable cloud systems with an emphasis on reliability and sensible cost controls.",
+      school: "Lycée Pilote Radhiâ Haddad, El Omrane",
+      degree: "Baccalaureate in Computer Science",
+      period: "2022",
+      details: "Secondary diploma specializing in computer science.",
+    },
+    {
+      school: "Certifications",
+      degree: "AI, Machine Learning & Deep Learning",
+      period: "2023 — 2024",
+      details:
+        "Generative AI & LLMs (Alison), AI x Web3 (Dione Protocol), Machine Learning with Python, Deep Learning & NLP, and problem solving / algorithms.",
     },
   ],
 };
@@ -132,22 +139,41 @@ export const experienceContent = {
   heading: "Experience",
   entries: [
     {
-      role: "Senior Software Engineer",
-      company: "Orbit Labs",
-      period: "2022 — Present",
+      role: "Software Developer",
+      company: "SMI — Société Le Monde Informatique, Tunis",
+      period: "May 2025 — Present",
       bullets: [
-        "Led delivery of a real-time collaboration workspace used across customer operations teams.",
-        "Cut deployment recovery time by simplifying release automation and production observability.",
-        "Mentored engineers and introduced lightweight architecture reviews for high-impact changes.",
+        "Develop backend services for banking software with Java and Spring Boot.",
+        "Work with Oracle databases, SQL and PL/SQL, and build and consume REST APIs.",
+        "Contribute to microservice-based architecture, banking workflows and business rules.",
+        "Improve system reliability, maintainability and business traceability.",
       ],
     },
     {
-      role: "Software Engineer",
-      company: "Northstar Studio",
-      period: "2020 — 2022",
+      role: "Development & Networking Intern",
+      company: "Tunisair, Tunis",
+      period: "Jul — Aug 2024",
       bullets: [
-        "Built and shipped customer-facing features from discovery through production support.",
-        "Partnered with design and product to turn ambiguous ideas into focused, testable releases.",
+        "Built a web app for remote Ethernet port configuration.",
+        "Applied CCNA principles to network configuration and system communication.",
+      ],
+    },
+    {
+      role: "AI & Web3 Workshop",
+      company: "Dione Protocol, Tunis",
+      period: "Jun — Jul 2024",
+      bullets: [
+        "Worked on energy disaggregation using TensorFlow and AI models.",
+        "Explored real-world applications of artificial intelligence and Web3.",
+      ],
+    },
+    {
+      role: "Web Development Intern",
+      company: "Smart Team, Tunis",
+      period: "Jun — Aug 2023",
+      bullets: [
+        "Built web projects with React, Angular and Node.js.",
+        "Strengthened both frontend and backend development skills.",
       ],
     },
   ],
@@ -156,10 +182,11 @@ export const experienceContent = {
 export const skillsContent = {
   heading: "Skills",
   groups: [
-    { category: "Languages", items: ["TypeScript", "JavaScript", "Python", "Go"] },
-    { category: "Frontend", items: ["React", "Three.js", "React Three Fiber", "CSS"] },
-    { category: "Backend", items: ["Node.js", "PostgreSQL", "REST / GraphQL APIs"] },
-    { category: "Tools", items: ["Git", "Docker", "CI/CD", "AWS"] },
+    { category: "Languages", items: ["Java", "JavaScript", "TypeScript", "Python", "SQL / PL-SQL"] },
+    { category: "Frontend", items: ["React", "Angular", "Node.js", "HTML", "CSS"] },
+    { category: "Backend & Databases", items: ["Spring Boot", "JPA / Hibernate", "Oracle", "REST APIs", "Microservices"] },
+    { category: "Artificial Intelligence", items: ["TensorFlow", "PyTorch", "Keras", "NLP", "Reinforcement Learning"] },
+    { category: "Networking", items: ["CCNA", "Network Configuration"] },
   ],
 };
 
@@ -167,32 +194,38 @@ export const projectsContent = {
   heading: "Projects",
   entries: [
     {
-      name: "This 3D Resume",
+      name: "Huda AI — Islamic Q&A Platform",
       description:
-        "An explorable low-poly town built with React Three Fiber — you're standing in it right now.",
-      link: "#",
+        "A full-stack web platform I created and deployed where users ask questions about Islam and receive AI-powered answers through a clean, accessible interface.",
+      link: "https://hudaaai.com/",
     },
     {
-      name: "Relay Dashboard",
-      description: "A live operations dashboard that turns noisy service events into clear, actionable incident timelines.",
-      link: "#",
+      name: "AI Maze (Reinforcement Learning)",
+      description: "A reinforcement-learning agent that learns to solve maze environments through training and decision-making.",
+      link: "https://github.com/AlainBx20/AI-Maze",
     },
     {
-      name: "Fieldnote",
-      description: "An offline-first research notebook for capturing structured observations and syncing them safely later.",
-      link: "#",
+      name: "Lung Disease Classification",
+      description: "A machine-learning / deep-learning project that classifies lung diseases from medical data.",
+      link: "https://github.com/AlainBx20/Lung-Disease-Classification",
+    },
+    {
+      name: "Ecology Simulation (AI Agent)",
+      description: "An AI-based ecological simulation focused on intelligent agent behavior and environmental modeling.",
+      link: "https://github.com/AlainBx20/Ecology-Simulation",
     },
   ],
 };
 
 export const contactContent = {
   heading: "Contact",
-  email: "hello@jordanavery.dev",
+  email: "alaachuikhaa@gmail.com",
   links: [
-    { label: "GitHub", url: "https://github.com/jordanavery" },
-    { label: "LinkedIn", url: "https://linkedin.com/in/jordanavery" },
+    { label: "GitHub", url: "https://github.com/AlainBx20" },
+    { label: "Huda AI", url: "https://hudaaai.com/" },
   ],
-  blurb: "Have an interesting product problem, a role to discuss, or simply want to compare notes? I’d love to hear from you.",
+  blurb:
+    "Have an interesting product problem, a banking or AI project, a role to discuss, or simply want to compare notes? I'd love to hear from you.",
 };
 
 // Furniture layout for each house's interior. One entry = one walk-up-and-
@@ -208,23 +241,23 @@ export const interiorLayouts: Record<SectionId, FurnitureItemDef[]> = {
     { model: `${FURN}radio.glb`, position: [-2.9, 0.65, -3.35], label: "What I Care About" },
   ],
   education: [
-    { model: `${FURN}desk.glb`, position: [-2.5, 0, -3], label: "Northbridge University" },
-    { model: `${FURN}bookcaseClosedWide.glb`, position: [2.5, 0, -3.3], rotationY: Math.PI, label: "Cloud Guild" },
+    { model: `${FURN}desk.glb`, position: [-2.5, 0, -3], label: "Bachelor's — ICT" },
+    { model: `${FURN}bookcaseClosedWide.glb`, position: [2.5, 0, -3.3], rotationY: Math.PI, label: "Baccalaureate" },
   ],
   experience: [
-    { model: `${FURN}desk.glb`, position: [-2.5, 0, -3], label: "Senior Software Engineer" },
-    { model: `${FURN}sideTableDrawers.glb`, position: [2.8, 0, -3], label: "Software Engineer" },
+    { model: `${FURN}desk.glb`, position: [-2.5, 0, -3], label: "Software Developer — SMI" },
+    { model: `${FURN}sideTableDrawers.glb`, position: [2.8, 0, -3], label: "Networking Intern" },
   ],
   skills: [
     { model: `${FURN}bookcaseOpenLow.glb`, position: [-3.6, 0, -3.3], rotationY: Math.PI, label: "Languages" },
     { model: `${FURN}computerScreen.glb`, position: [-1.2, 0, -3.3], rotationY: Math.PI, label: "Frontend" },
     { model: `${FURN}kitchenCabinetDrawer.glb`, position: [1.2, 0, -3.3], rotationY: Math.PI, label: "Backend" },
-    { model: `${FURN}cabinetTelevision.glb`, position: [3.6, 0, -3.3], rotationY: Math.PI, label: "Tools" },
+    { model: `${FURN}cabinetTelevision.glb`, position: [3.6, 0, -3.3], rotationY: Math.PI, label: "AI" },
   ],
   projects: [
-    { model: `${FURN}tableCoffee.glb`, position: [-3, 0, -2.8], label: "This 3D Resume" },
-    { model: `${FURN}tableRound.glb`, position: [0, 0, -3.2], label: "Relay Dashboard" },
-    { model: `${FURN}tableGlass.glb`, position: [3, 0, -2.8], label: "Fieldnote" },
+    { model: `${FURN}tableCoffee.glb`, position: [-3, 0, -2.8], label: "Huda AI" },
+    { model: `${FURN}tableRound.glb`, position: [0, 0, -3.2], label: "AI Maze" },
+    { model: `${FURN}tableGlass.glb`, position: [3, 0, -2.8], label: "Lung Disease ML" },
   ],
   contact: [{ model: `${FURN}desk.glb`, position: [0, 0, -3], label: "Get In Touch" }],
 };

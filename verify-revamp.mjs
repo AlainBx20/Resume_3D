@@ -25,8 +25,8 @@ if (chapterCount !== 6) throw new Error(`Expected 6 résumé chapters, found ${c
 
 await page.getByRole("button", { name: /Education/ }).click();
 await page.waitForTimeout(300);
-if (!(await page.getByText("Northbridge University").isVisible())) throw new Error("Education overview did not open");
-if (!(await page.getByText("Cloud Guild").isVisible())) throw new Error("Education overview is incomplete");
+if (!(await page.getByText("Faculty of Sciences of Tunis (FST)").isVisible())) throw new Error("Education overview did not open");
+if (!(await page.getByText("Lycée Pilote Radhiâ Haddad, El Omrane").isVisible())) throw new Error("Education overview is incomplete");
 await page.screenshot({ path: "qa-panel.png" });
 await page.getByRole("button", { name: "Close résumé chapter" }).click();
 
