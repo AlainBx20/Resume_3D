@@ -5,7 +5,7 @@ description: "Picking with raycasting, camera controls, transform gizmos, drag, 
 
 # Three.js Interaction
 
-Targets three.js r186. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
+Targets three.js r187. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
 
 ## Quick Start
 

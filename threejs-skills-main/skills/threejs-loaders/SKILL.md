@@ -5,7 +5,7 @@ description: "Loading three.js assets: glTF with Draco, meshopt and KTX2 compres
 
 # Three.js Loaders
 
-Targets three.js r186. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
+Targets three.js r187. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
 
 ## Quick Start
 

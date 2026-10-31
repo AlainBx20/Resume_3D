@@ -5,7 +5,7 @@ description: "Measuring and optimizing three.js speed: render statistics, memory
 
 # Three.js Performance
 
-Targets three.js r186. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
+Targets three.js r187. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
 
 ## Quick Start
 

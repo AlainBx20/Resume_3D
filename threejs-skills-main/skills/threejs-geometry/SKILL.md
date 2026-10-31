@@ -5,7 +5,7 @@ description: "Creating and shaping three.js geometry: built-in shapes, 3D text, 
 
 # Three.js Geometry
 
-Targets three.js r186. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
+Targets three.js r187. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
 
 ## Quick Start
 

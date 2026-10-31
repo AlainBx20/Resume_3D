@@ -5,7 +5,7 @@ description: "Light types and physical units, shadow maps, HDR environment light
 
 # Three.js Lighting
 
-Targets three.js r186. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
+Targets three.js r187. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
 
 ## Quick Start
 

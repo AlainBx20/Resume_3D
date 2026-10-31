@@ -5,7 +5,7 @@ description: "Custom GLSL vertex and fragment shaders: uniforms, varyings, shade
 
 # Three.js Shaders
 
-Targets three.js r186. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
+Targets three.js r187. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
 
 ## Quick Start
 

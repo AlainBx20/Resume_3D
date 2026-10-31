@@ -2,11 +2,11 @@
 
 Skill files that give Claude Code current, verified knowledge of three.js, so the code it writes runs on the release you actually install.
 
-The skills target **three.js r186** (`three@0.186`), React Three Fiber 9.8 with drei 10.7, and gltf-transform 4.5. Rendering examples use `WebGLRenderer`, directly or through React Three Fiber; the WebGPU and TSL section in every skill covers `WebGPURenderer`.
+The skills target **three.js r187** (`three@0.187`), React Three Fiber 9.8 with drei 10.7, and gltf-transform 4.5. Rendering examples use `WebGLRenderer`, directly or through React Three Fiber; the WebGPU and TSL section in every skill covers `WebGPURenderer`.
 
 ## Why
 
-Claude Code knows three.js from its training data, which mixes many releases. A lot changed between r160 and r186: `RGBELoader` became `HDRLoader`, `Clock` gave way to `Timer`, `PostProcessing` became `RenderPipeline`, WebGL 1 support is gone, and the three.js docs now tell LLMs to use `WebGPURenderer` with TSL for custom shaders and materials. These skills give Claude Code the current API, working examples, and a Common Mistakes list of the outdated patterns models still reach for.
+Claude Code knows three.js from its training data, which mixes many releases. A lot changed between r160 and r187: `RGBELoader` became `HDRLoader`, `Clock` gave way to `Timer`, `PostProcessing` became `RenderPipeline`, WebGL 1 support is gone, and the three.js docs now tell LLMs to use `WebGPURenderer` with TSL for custom shaders and materials. These skills give Claude Code the current API, working examples, and a Common Mistakes list of the outdated patterns models still reach for.
 
 ## Installation
 
@@ -70,18 +70,18 @@ description: "What the skill covers. Use when ..."
 
 # Three.js <Topic>
 
-Targets three.js r186. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
+Targets three.js r187. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
 
 ## Quick Start          a complete, runnable example
 ## <topic sections>     the API with working examples
 ## WebGPU and TSL       the same topic under WebGPURenderer
-## Common Mistakes      outdated or wrong code → the r186 fix, with the reason
+## Common Mistakes      outdated or wrong code → the r187 fix, with the reason
 ## See Also             related skills
 ```
 
 ## Verification
 
-The skills were checked against the published `three@0.186.1` package and the official Migration Guide, and against `@react-three/fiber@9.8.2`, `@react-three/drei@10.7.9`, `@gltf-transform/cli@4.5.1` and `gltfjsx@6.5.3` where they apply:
+The skills were checked against the published `three@0.187.0` package and the official Migration Guide, and against `@react-three/fiber@9.8.2`, `@react-three/drei@10.7.9`, `@gltf-transform/cli@4.5.1` and `gltfjsx@6.5.3` where they apply:
 
 - every three.js, React Three Fiber, drei and gltf-transform import path, and every `THREE.*` class used in an example, exists in its package
 - every JavaScript block parses as an ES module

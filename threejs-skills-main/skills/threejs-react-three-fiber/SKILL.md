@@ -5,7 +5,7 @@ description: "Building three.js scenes from React with React Three Fiber and dre
 
 # Three.js React Three Fiber
 
-Targets three.js r186. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
+Targets three.js r187. Examples use WebGLRenderer; the WebGPU and TSL section uses WebGPURenderer.
 
 ## Quick Start
 
