@@ -40,7 +40,7 @@ export interface DecorItemDef {
 
 export const PLAYER_NAME = "Alaa Ben Chouikha";
 export const PLAYER_ROLE = "Software Developer";
-export const TOWN_NAME = "Alaaville"; // TODO: swap for the custom town name once chosen
+export const TOWN_NAME = "Resume Town";
 export const PROFILE_NOTE = "Software Developer @ SMI · Creator of Huda AI";
 export const WORLD_FONT = "/fonts/kenpixel.ttf";
 
