@@ -8,7 +8,7 @@ import { WORLD_FONT } from "../content";
 // WebGPU backend and the WebGL2 fallback. Same layout props as the old <Text>.
 
 const FAMILY = "KenWorld";
-const PX_PER_UNIT = 150; // canvas resolution per world unit — crisp at sign distance
+const PX_PER_UNIT = 240; // canvas resolution per world unit — crisp at sign distance
 const PAD = 0.12; // world-unit padding baked around the text so outlines/edges fit
 
 // --- one shared font load, surfaced to React without re-rendering on every frame

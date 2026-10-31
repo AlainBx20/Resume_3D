@@ -43,10 +43,11 @@ export default function BuildingSign({ def }: { def: BuildingDef }) {
         <meshStandardMaterial color={WOOD} roughness={0.85} />
       </mesh>
 
-      {/* colored face in the building's accent color, gently glowing at dusk */}
+      {/* colored face in the building's accent color — only a touch of emissive
+          so it stays vivid without blooming over the lettering */}
       <mesh position={[0, panelY, 0.04]} castShadow>
         <boxGeometry args={[PANEL_WIDTH, PANEL_HEIGHT, 0.12]} />
-        <meshStandardMaterial color={def.color} emissive={def.color} emissiveIntensity={0.45} roughness={0.5} />
+        <meshStandardMaterial color={def.color} emissive={def.color} emissiveIntensity={0.1} roughness={0.55} />
       </mesh>
 
       {/* white title on both faces */}

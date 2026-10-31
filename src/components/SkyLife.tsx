@@ -13,12 +13,19 @@ const CLOUD_STYLE: Record<WeatherKind, { color: string; opacity: number; scale: 
 };
 
 const CLOUDS = [
-  { z: -70, y: 48, seed: 1, scale: 9, range: 90 },
-  { z: -50, y: 52, seed: 4, scale: 7, range: 80 },
-  { z: -85, y: 58, seed: 9, scale: 11, range: 110 },
-  { z: 30, y: 50, seed: 14, scale: 6, range: 70 },
-  { z: 60, y: 55, seed: 21, scale: 10, range: 120 },
+  { z: -80, y: 50, seed: 1, scale: 10, range: 100 },
+  { z: -55, y: 54, seed: 4, scale: 8, range: 85 },
+  { z: -95, y: 60, seed: 9, scale: 12, range: 115 },
+  { z: 35, y: 52, seed: 14, scale: 7, range: 75 },
+  { z: 70, y: 57, seed: 21, scale: 11, range: 125 },
+  { z: -20, y: 62, seed: 27, scale: 9, range: 95 },
+  { z: 15, y: 48, seed: 33, scale: 6, range: 70 },
+  { z: 95, y: 63, seed: 41, scale: 13, range: 130 },
+  { z: -40, y: 46, seed: 48, scale: 7, range: 80 },
+  { z: 50, y: 66, seed: 56, scale: 10, range: 110 },
 ];
+
+const PUFFS_PER_CLOUD = 13;
 
 function DriftingClouds() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
@@ -28,14 +35,20 @@ function DriftingClouds() {
   const puffs = useMemo(() => {
     return CLOUDS.flatMap((cloud, cloudIndex) => {
       const random = mulberry32(cloud.seed * 991);
-      return Array.from({ length: 8 }, (_, puffIndex) => ({
-        cloudIndex,
-        puffIndex,
-        x: (random() - 0.5) * cloud.scale * 1.3,
-        y: (random() - 0.5) * cloud.scale * 0.22,
-        z: (random() - 0.5) * cloud.scale * 0.45,
-        scale: cloud.scale * (0.25 + random() * 0.24),
-      }));
+      return Array.from({ length: PUFFS_PER_CLOUD }, (_, puffIndex) => {
+        // cumulus shape: wide, flat-ish bottom, bumpier domed top; bigger puffs
+        // toward the center of the cluster, smaller at the edges
+        const spread = (random() - 0.5) * 2;
+        const edge = Math.abs(spread);
+        return {
+          cloudIndex,
+          puffIndex,
+          x: spread * cloud.scale * 1.5,
+          y: (0.1 + random() * 0.45) * cloud.scale * (1 - edge * 0.5),
+          z: (random() - 0.5) * cloud.scale * 0.7,
+          scale: cloud.scale * (0.32 + (1 - edge) * 0.3 + random() * 0.12),
+        };
+      });
     });
   }, []);
 

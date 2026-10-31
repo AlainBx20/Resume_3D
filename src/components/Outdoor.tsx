@@ -18,23 +18,7 @@ import Rain from "./Rain";
 import Snow from "./Snow";
 import LightningBolt from "./LightningBolt";
 import Fireflies from "./Fireflies";
-import DecorItem from "./DecorItem";
-import { buildings, type DecorItemDef } from "../content";
-
-// three benches around the plaza ring, each turned to face the fountain
-const BENCHES: DecorItemDef[] = [0, 2, 4].map((i) => {
-  const sorted = buildings
-    .map((b) => Math.atan2(b.position[0], b.position[2]))
-    .sort((a, b) => a - b);
-  const next = i + 1 < sorted.length ? sorted[i + 1] : sorted[0] + Math.PI * 2;
-  const angle = (sorted[i] + next) / 2 + 0.42; // beside the lamp, not inside it
-  return {
-    model: "/models/furniture/bench.glb",
-    position: [Math.sin(angle) * 6.4, 0, Math.cos(angle) * 6.4],
-    rotationY: angle + Math.PI,
-    scale: 1.7,
-  };
-});
+import { buildings } from "../content";
 
 function PlazaGarden() {
   const { scene } = useGLTF("/models/suburban/planter.glb");
@@ -79,9 +63,6 @@ export default function Outdoor() {
       <ChimneySmoke />
       <StreetLamps />
       <Signpost />
-      {BENCHES.map((def, i) => (
-        <DecorItem key={`bench-${i}`} def={def} />
-      ))}
       <Rain />
       <Snow />
       <LightningBolt />
