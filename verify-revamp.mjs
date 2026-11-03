@@ -36,6 +36,21 @@ const pointerLocked = await page.evaluate(() => Boolean(document.pointerLockElem
 if (!pointerLocked) throw new Error("Town did not acquire pointer lock from the entry overlay");
 await page.screenshot({ path: "qa-spawn.png" });
 
+const movementBefore = await page.evaluate(() => [
+  window.__camera.position.x,
+  window.__camera.position.z,
+]);
+await page.keyboard.down("KeyW");
+await page.waitForTimeout(450);
+await page.keyboard.up("KeyW");
+const movementAfter = await page.evaluate(() => [
+  window.__camera.position.x,
+  window.__camera.position.z,
+]);
+if (Math.hypot(movementAfter[0] - movementBefore[0], movementAfter[1] - movementBefore[1]) < 0.5) {
+  throw new Error("Player movement was blocked near spawn");
+}
+
 await page.evaluate(() => document.exitPointerLock());
 await page.locator(".pause-card").waitFor({ state: "visible", timeout: 3000 });
 
@@ -54,6 +69,12 @@ for (const id of ["about", "education", "experience", "skills", "projects", "con
 
 await page.keyboard.press("Digit3");
 await page.waitForTimeout(5000);
+await page.evaluate(() => {
+  window.__atm.boltSeed = 0.42;
+  window.__atm.boltAt = performance.now();
+  window.__atm.flash = 1;
+});
+await page.waitForTimeout(80);
 await page.screenshot({ path: "qa-weather-storm.png" });
 await page.keyboard.press("Digit4");
 await page.waitForTimeout(5000);

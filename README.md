@@ -44,23 +44,53 @@ keyboard, on small screens, and when pointer lock is unavailable.
 ## The living world
 
 - **Day/night cycle** — a full in-game day lasts 10 minutes. The sun and moon
-  ride the sky, the gradient dome repaints itself continuously, stars and
-  fireflies come out at night, street lamps and building windows switch on at
-  dusk.
+  ride the sky, the gradient dome repaints itself continuously, stars,
+  shooting stars and fireflies come out at night, and the street lamps flicker
+  awake at dusk before settling into warm pools of light.
+- **Living landmarks** — the central fountain uses smooth curved water streams,
+  a falling water curtain and expanding ripples, while a rock-lined woodland
+  pond has swimming ducks, lily pads and wakes.
+- **Terrain and navigation** — low procedural foothills blend into a varied
+  ring of recolored low-poly mountain peaks. A live illustrated HUD map shows
+  roads, numbered résumé buildings, the plaza fountain, pond and forest edge
+  while tracking the visitor's position and facing direction.
+- **True exterior doorways** — every interior exit opens onto a live 1:1 view
+  of the same plaza, paths, fountain, buildings, trees, mountains and weather,
+  rotated to match that house's real position in town.
 - **Weather** — clear, rain, storm and snow, drifting automatically or forced
   with the number keys. Weather is *remembered by the world*: rain slicks the
   ground and leaves reflective puddles (and a rainbow once it clears), snow
-  accumulates into a white blanket and melts later, wind bends the trees,
-  shears the chimney smoke and pushes the clouds.
-- **Storms** — lightning bolts strike beyond the mountains with a sky flash
-  and delayed, distance-scaled thunder.
-- **Procedural audio** — wind, rain, thunder and footsteps are synthesized
-  with the Web Audio API (zero audio files). Sound muffles when you step
-  indoors.
+  accumulates into a white blanket and melts later, wet footsteps create
+  splash ripples, snow keeps temporary alternating footprints, wind bends the
+  trees, shears chimney smoke and pushes the clouds.
+- **Rain and storms** — 3,500 varied GPU-driven near/far streaks surround the
+  camera, with low ground haze and instanced impact crowns/ripples. Tapered,
+  branching lightning now fires in several pulses, throws a powerful local
+  light across the town, and ends in a ground flare, shock ring and sparks.
+  Thunder and rain use layered low, mid and high-frequency sound beds instead
+  of a single noise filter. Cars become glossy when wet, receive dedicated
+  roof/hood splash contacts, and produce nearby rain-on-metal patter.
+- **Night lighting** — the textured moon is a real directional light source:
+  buildings, trees and street furniture cast tuned soft moon shadows while
+  windows and lamps provide warm contrast.
+- **Town detail** — a marked two-lane perimeter road connects to a full entry
+  lane, curves around the buildings and pond, and disappears into a lit rock
+  tunnel at the world edge. Twenty-three measured, hand-placed street props
+  add six plaza benches in cobbled garden nooks, six bins, six hydrants and
+  five full-scale vehicles, all using locally served KayKit models. Vegetation
+  is cleared from the asphalt; cars use tight oriented collision shapes and
+  automatically switch on headlights and tail lights at night or in storms.
+- **Achievements** — 71 persistent achievements now cover exploration,
+  weather, time of day, movement, rooms, interactive props, secrets and the
+  playable computer apps.
+- **Procedural audio** — wind, rain, softer multi-layer thunder, surface-aware
+  footsteps, nearby fountain/pond water and occasional bird calls are
+  synthesized with the Web Audio API. Sound muffles when you step indoors.
 - **Performance** — the forest is two GPU-instanced draw calls with wind sway
-  done in the vertex shader; rain and snow are single static draw calls
-  animated entirely on the GPU. Procedural clouds are also instanced, the
-  render resolution is capped, and post-processing runs without MSAA.
+  done in the vertex shader; both rain layers and snow use static geometry
+  animated entirely on the GPU. Procedural clouds, rain impacts, fountain droplets and pond
+  stones are also instanced, the render resolution is capped, and the mountain
+  range is only two merged meshes.
 
 ## Making it yours
 

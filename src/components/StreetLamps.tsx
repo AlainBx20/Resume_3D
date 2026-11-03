@@ -33,6 +33,7 @@ function Lamp({ angle, glowMap }: { angle: number; glowMap: THREE.Texture }) {
   const clone = useMemo(() => scene.clone(), [scene]);
   const bulbRef = useRef<THREE.Mesh>(null);
   const spriteRef = useRef<THREE.Sprite>(null);
+  const lightRef = useRef<THREE.PointLight>(null);
 
   const x = Math.sin(angle) * LAMP_RADIUS;
   const z = Math.cos(angle) * LAMP_RADIUS;
@@ -54,16 +55,28 @@ function Lamp({ angle, glowMap }: { angle: number; glowMap: THREE.Texture }) {
     return registerCollider(box);
   }, [x, z]);
 
-  useFrame(() => {
-    // lamps switch on as daylight fades
+  useFrame((state) => {
+    // At dusk each old lamp sputters to life for a moment, then settles into
+    // a steady warm pool. The phase is derived from its angle so all six do
+    // not flicker in unison.
     const lit = THREE.MathUtils.clamp(1 - atm.day * 1.8, 0, 1);
+    const waking = lit > 0.04 && lit < 0.88;
+    const flicker = waking
+      ? Math.sin(state.clock.elapsedTime * 31 + angle * 11) > -0.15
+        ? 1
+        : 0.18
+      : 1;
+    const level = lit * flicker;
     const bulb = bulbRef.current;
     if (bulb) {
-      (bulb.material as THREE.MeshStandardMaterial).emissiveIntensity = lit * 3.2;
+      (bulb.material as THREE.MeshStandardMaterial).emissiveIntensity = level * 3.2;
     }
     const sprite = spriteRef.current;
     if (sprite) {
-      (sprite.material as THREE.SpriteMaterial).opacity = lit * 0.55;
+      (sprite.material as THREE.SpriteMaterial).opacity = level * 0.55;
+    }
+    if (lightRef.current) {
+      lightRef.current.intensity = level * 1.25;
     }
   });
 
@@ -79,6 +92,14 @@ function Lamp({ angle, glowMap }: { angle: number; glowMap: THREE.Texture }) {
       <sprite ref={spriteRef} position={BULB_LOCAL} scale={[1.6, 1.6, 1]}>
         <spriteMaterial map={glowMap} transparent opacity={0} depthWrite={false} />
       </sprite>
+      <pointLight
+        ref={lightRef}
+        position={BULB_LOCAL}
+        color="#ffc77b"
+        intensity={0}
+        distance={8}
+        decay={2}
+      />
     </group>
   );
 }

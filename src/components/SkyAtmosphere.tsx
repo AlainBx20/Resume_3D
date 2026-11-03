@@ -5,31 +5,28 @@ import * as THREE from "three";
 import SkyDome from "./SkyDome";
 import StarField from "./StarField";
 import Rainbow from "./Rainbow";
+import { Moon, CosmosPlanet } from "./SkyBodies";
 import { atm } from "../atmosphere";
 
 const SUN_DISTANCE = 95;
 const LIGHT_DISTANCE = 60;
-const AMBIENT_NIGHT = new THREE.Color("#33395f");
+const AMBIENT_NIGHT = new THREE.Color("#20284b");
 const AMBIENT_DAY = new THREE.Color("#cdd6f0");
 
 export default function SkyAtmosphere() {
   const sunRef = useRef<THREE.Mesh>(null);
-  const moonRef = useRef<THREE.Mesh>(null);
-  const moonHaloRef = useRef<THREE.Mesh>(null);
   const dirLightRef = useRef<THREE.DirectionalLight>(null);
   const ambientRef = useRef<THREE.AmbientLight>(null);
   const fogRef = useRef<THREE.Fog>(null);
 
   useFrame(() => {
     const sun = sunRef.current;
-    const moon = moonRef.current;
-    const halo = moonHaloRef.current;
     const dirLight = dirLightRef.current;
     const ambient = ambientRef.current;
     const fog = fogRef.current;
-    if (!sun || !moon || !halo || !dirLight || !ambient || !fog) return;
+    if (!sun || !dirLight || !ambient || !fog) return;
 
-    // sun + moon discs ride their sky directions and always face the town
+    // sun disc rides its sky direction and always faces the town
     sun.position.copy(atm.sunDir).multiplyScalar(SUN_DISTANCE);
     sun.lookAt(0, 0, 0);
     sun.visible = atm.sunDir.y > -0.12;
@@ -37,30 +34,21 @@ export default function SkyAtmosphere() {
     (sun.material as THREE.MeshBasicMaterial).opacity =
       Math.min(atm.sunDir.y * 6 + 0.7, 1) * (1 - atm.overcast * 0.85);
 
-    moon.position.copy(atm.moonDir).multiplyScalar(SUN_DISTANCE);
-    moon.lookAt(0, 0, 0);
-    halo.position.copy(moon.position);
-    halo.lookAt(0, 0, 0);
-    const moonUp = Math.max(atm.moonDir.y, 0);
-    moon.visible = halo.visible = moonUp > 0.02;
-    (moon.material as THREE.MeshBasicMaterial).opacity =
-      Math.min(moonUp * 4, 1) * (1 - atm.overcast * 0.8);
-    (halo.material as THREE.MeshBasicMaterial).opacity =
-      Math.min(moonUp * 4, 1) * 0.12 * (1 - atm.overcast * 0.8);
-
     // one directional light plays both sun and moon
     const isDay = atm.day > 0.04;
     if (isDay) {
       dirLight.position.copy(atm.sunDir).multiplyScalar(LIGHT_DISTANCE);
       dirLight.color.copy(atm.sunColor);
-      dirLight.intensity = atm.day * 1.6 * (1 - atm.overcast * 0.75);
+      dirLight.intensity = atm.day * 1.75 * (1 - atm.overcast * 0.72);
+      dirLight.shadow.intensity = THREE.MathUtils.lerp(0.58, 0.82, atm.day);
     } else {
       dirLight.position.copy(atm.moonDir).multiplyScalar(LIGHT_DISTANCE);
-      dirLight.color.set("#8fa5d9");
-      dirLight.intensity = 0.22 * (1 - atm.overcast * 0.6);
+      dirLight.color.set("#91ace8");
+      dirLight.intensity = 0.52 * (1 - atm.overcast * 0.62);
+      dirLight.shadow.intensity = 0.64 * (1 - atm.overcast * 0.35);
     }
 
-    ambient.intensity = 0.16 + atm.day * 0.32 * (1 - atm.overcast * 0.3) + atm.flash * 2.2;
+    ambient.intensity = 0.095 + atm.day * 0.38 * (1 - atm.overcast * 0.3) + atm.flash * 2.4;
     ambient.color.lerpColors(AMBIENT_NIGHT, AMBIENT_DAY, atm.day);
 
     fog.color.copy(atm.skyHorizon);
@@ -83,22 +71,8 @@ export default function SkyAtmosphere() {
         <meshBasicMaterial color="#ffdca0" transparent toneMapped={false} fog={false} />
       </mesh>
 
-      <mesh ref={moonHaloRef} position={[-40, 22, 70]}>
-        <circleGeometry args={[13, 32]} />
-        <meshBasicMaterial
-          color="#cfd8e8"
-          transparent
-          opacity={0.12}
-          depthWrite={false}
-          toneMapped={false}
-          fog={false}
-        />
-      </mesh>
-      <mesh ref={moonRef} position={[-40, 22, 70]}>
-        <circleGeometry args={[7.5, 32]} />
-        <meshBasicMaterial color="#cfd8e8" transparent toneMapped={false} fog={false} />
-      </mesh>
-
+      <Moon />
+      <CosmosPlanet />
       <directionalLight
         ref={dirLightRef}
         position={[40, 8, -22]}
@@ -106,11 +80,14 @@ export default function SkyAtmosphere() {
         color="#ffb37a"
         castShadow
         shadow-mapSize={[2048, 2048]}
+        shadow-bias={-0.00018}
+        shadow-normalBias={0.032}
+        shadow-radius={2.2}
         shadow-camera-far={120}
-        shadow-camera-left={-50}
-        shadow-camera-right={50}
-        shadow-camera-top={50}
-        shadow-camera-bottom={-50}
+        shadow-camera-left={-43}
+        shadow-camera-right={43}
+        shadow-camera-top={43}
+        shadow-camera-bottom={-43}
       />
       <ambientLight ref={ambientRef} intensity={0.4} color="#9aa0d4" />
     </>

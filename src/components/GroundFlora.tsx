@@ -3,6 +3,9 @@ import * as THREE from "three";
 import { buildings } from "../content";
 import { mulberry32 } from "../rand";
 import { GROUND_RADIUS, PLAZA_RADIUS } from "./Ground";
+import { insidePondClearance } from "../landmarks";
+import { isOnTownRoad } from "../roads";
+import { insideBenchNook } from "../streetLayout";
 
 const GRASS_COUNT = 700;
 const FLOWER_COUNT = 170;
@@ -34,9 +37,14 @@ function scatter(rng: () => number, count: number, shadeCount: number): Sprout[]
     const onPath =
       radius < 13 && buildingAngles.some((ba) => angularDiff(angle, ba) < pathClearance);
     if (onPath) continue;
+    const x = Math.sin(angle) * radius;
+    const z = Math.cos(angle) * radius;
+    if (insidePondClearance(x, z, 0.7)) continue;
+    if (isOnTownRoad(x, z, 0.45)) continue;
+    if (insideBenchNook(x, z, 0.35)) continue;
     list.push({
-      x: Math.sin(angle) * radius,
-      z: Math.cos(angle) * radius,
+      x,
+      z,
       scale: 0.7 + rng() * 0.8,
       colorIndex: Math.floor(rng() * shadeCount),
     });

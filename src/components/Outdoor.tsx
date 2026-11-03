@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import SkyAtmosphere from "./SkyAtmosphere";
 import SkyLife from "./SkyLife";
 import Ground from "./Ground";
+import TownRoads from "./TownRoads";
 import GroundFlora from "./GroundFlora";
 import GrassField from "./GrassField";
 import InstancedTrees from "./InstancedTrees";
@@ -12,13 +13,15 @@ import CityProps from "./CityProps";
 import Building from "./Building";
 import ChimneySmoke from "./ChimneySmoke";
 import Fountain from "./Fountain";
+import Pond from "./Pond";
 import StreetLamps from "./StreetLamps";
-import Signpost from "./Signpost";
 import Rain from "./Rain";
+import CarRainEffects from "./CarRainEffects";
 import Snow from "./Snow";
 import LightningBolt from "./LightningBolt";
 import Fireflies from "./Fireflies";
 import Butterflies from "./Butterflies";
+import FootstepEffects from "./FootstepEffects";
 import { buildings } from "../content";
 
 function PlazaGarden() {
@@ -54,6 +57,7 @@ export default function Outdoor() {
       <SkyLife />
       <MountainRange />
       <Ground />
+      <TownRoads />
       <GroundFlora />
       <GrassField />
       <InstancedTrees />
@@ -61,14 +65,16 @@ export default function Outdoor() {
       <CityProps />
       <PlazaGarden />
       <Fountain />
+      <Pond />
       <ChimneySmoke />
       <StreetLamps />
-      <Signpost />
       <Rain />
+      <CarRainEffects />
       <Snow />
       <LightningBolt />
       <Fireflies />
       <Butterflies />
+      <FootstepEffects />
       {buildings.map((def) => (
         <Building key={def.id} def={def} />
       ))}

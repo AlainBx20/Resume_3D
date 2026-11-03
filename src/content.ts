@@ -21,12 +21,15 @@ export interface BuildingDef {
   color: string;
 }
 
+export type PropKind = "book" | "pc" | "tv" | "radio" | "light" | "clock" | "fire" | "star" | "art" | "part" | "brokenpc";
+
 export interface FurnitureItemDef {
   model: string;
   position: [number, number, number];
   rotationY?: number;
   scale?: number; // defaults to FurnitureItem's EXHIBIT_SCALE when omitted
   label: string;
+  kind?: PropKind; // special behaviour; omitted = opens the plain chapter panel
 }
 
 // Non-interactive set dressing inside each house. `noCollide` is for rugs and
@@ -238,99 +241,151 @@ export const contactContent = {
 const FURN = "/models/furniture/";
 const KFURN = "/models/kaykit/furniture/";
 
+// Layout rules (room inner bounds x ±4.84, z -3.84..3.84, door at z=+3.84):
+// every model's front faces +z, so rotationY 0 faces the room from the back
+// wall, π/2 faces +x from the left wall and -π/2 faces -x from the right wall.
+// Big pieces sit flush against walls; small items rest on surfaces.
 export const interiorLayouts: Record<SectionId, FurnitureItemDef[]> = {
   about: [
-    // books on the coffee table, radio on the cabinet — y sits them on the surface
-    { model: `${KFURN}book_set.glb`, position: [0.2, 0.68, 0.8], scale: 0.7, label: "Who I Am" },
-    { model: `${KFURN}cactus_medium_A.glb`, position: [2.9, 0, -3.1], scale: 1.2, label: "This Town" },
-    { model: `${FURN}radio.glb`, position: [-2.9, 0.8, -3.35], label: "What I Care About" },
+    { model: `${KFURN}book_set.glb`, position: [0, 0.675, -0.35], scale: 0.7, label: "Who I Am", kind: "book" },
+    { model: `${KFURN}cactus_medium_A.glb`, position: [2.3, 0, -3.35], scale: 1.2, label: "This Town" },
+    { model: `${FURN}radio.glb`, position: [-2.1, 0.8, -3.42], label: "What I Care About", kind: "radio" },
+    { model: `${FURN}televisionModern.glb`, position: [0, 0.8, -3.5], scale: 2.2, label: "Watch TV", kind: "tv" },
   ],
   education: [
-    { model: `${KFURN}table_medium_long.glb`, position: [-2.3, 0, -2.9], scale: 0.78, label: "Bachelor's — ICT" },
-    { model: `${KFURN}shelf_B_small_decorated.glb`, position: [2.6, 0, -3.3], rotationY: Math.PI, scale: 1.3, label: "Baccalaureate" },
+    { model: `${KFURN}table_medium_long.glb`, position: [-2.2, 0, -3.02], scale: 0.8, label: "Bachelor's — ICT", kind: "book" },
+    { model: `${FURN}bookcaseOpen.glb`, position: [3.0, 0, -3.5], scale: 2.4, label: "Baccalaureate", kind: "book" },
   ],
   experience: [
-    { model: `${KFURN}table_medium_long.glb`, position: [-2.3, 0, -2.9], scale: 0.78, label: "Software Developer — SMI" },
-    { model: `${KFURN}cabinet_medium.glb`, position: [2.6, 0, -3.2], scale: 0.8, label: "Networking Intern" },
+    { model: `${KFURN}table_medium_long.glb`, position: [-2.2, 0, -3.02], scale: 0.8, label: "Software Developer — SMI", kind: "pc" },
+    { model: `${KFURN}cabinet_medium.glb`, position: [2.6, 0, -3.42], scale: 0.8, label: "Networking Intern" },
   ],
   skills: [
-    { model: `${KFURN}shelf_B_small_decorated.glb`, position: [-3.6, 0, -3.3], rotationY: Math.PI, scale: 1.3, label: "Languages" },
-    { model: `${FURN}computerScreen.glb`, position: [-1.2, 0, -3.3], rotationY: Math.PI, scale: 1.9, label: "Frontend" },
-    { model: `${KFURN}cabinet_medium.glb`, position: [1.4, 0, -3.3], rotationY: Math.PI, scale: 0.8, label: "Backend" },
-    { model: `${KFURN}cabinet_small.glb`, position: [3.6, 0, -3.3], rotationY: Math.PI, scale: 0.8, label: "AI" },
+    { model: `${FURN}bookcaseOpen.glb`, position: [-3.9, 0, -3.5], scale: 2.4, label: "Languages", kind: "book" },
+    { model: `${FURN}computerScreen.glb`, position: [-0.9, 0.8, -3.3], scale: 1.9, label: "Frontend", kind: "pc" },
+    { model: `${KFURN}cabinet_medium.glb`, position: [2.5, 0, -3.42], scale: 0.8, label: "Backend" },
+    { model: `${KFURN}cabinet_small.glb`, position: [4.2, 0, -3.42], scale: 0.8, label: "AI" },
   ],
   projects: [
-    { model: `${KFURN}table_low.glb`, position: [-3, 0, -2.8], scale: 1.0, label: "Huda AI" },
-    { model: `${KFURN}table_small.glb`, position: [0, 0, -3.2], scale: 0.9, label: "AI Maze" },
-    { model: `${KFURN}table_medium.glb`, position: [3, 0, -2.8], scale: 0.8, label: "Lung Disease ML" },
+    { model: `${KFURN}table_medium.glb`, position: [-3.2, 0, -3.0], scale: 0.8, label: "Huda AI", kind: "pc" },
+    { model: `${KFURN}table_small.glb`, position: [0, 0, -3.35], scale: 0.9, label: "AI Maze", kind: "pc" },
+    { model: `${KFURN}table_medium.glb`, position: [3.2, 0, -3.0], scale: 0.8, label: "Lung Disease ML", kind: "pc" },
   ],
-  contact: [{ model: `${KFURN}table_medium_long.glb`, position: [0, 0, -3], scale: 0.8, label: "Get In Touch" }],
+  contact: [{ model: `${KFURN}table_medium_long.glb`, position: [0, 0, -3.02], scale: 0.8, label: "Get In Touch", kind: "pc" }],
 };
 
 // Cozy set dressing per room (sofas, rugs, plants, lamps…). Purely visual —
 // walk past it, it never opens a panel. Positions assume a centered footprint.
 export const interiorDecor: Record<SectionId, DecorItemDef[]> = {
   about: [
-    { model: `${KFURN}rug_oval_A.glb`, position: [0, 0.005, 0.3], scale: 1.3, noCollide: true },
+    { model: `${KFURN}rug_rectangle_A.glb`, position: [0, 0.005, 0.3], scale: 1.3, noCollide: true },
     { model: `${KFURN}rug_rectangle_A.glb`, position: [0, 0.005, 3.3], scale: 0.55, noCollide: true },
-    { model: `${KFURN}couch.glb`, position: [-4.0, 0, 0.4], rotationY: Math.PI / 2, scale: 0.85 },
-    { model: `${FURN}bear.glb`, position: [-3.2, 0, 1.8], rotationY: 1.1, scale: 1.5 },
-    { model: `${FURN}televisionModern.glb`, position: [4.3, 0, 0.3], rotationY: -Math.PI / 2, scale: 2.2 },
-    { model: `${KFURN}table_low.glb`, position: [0.2, 0, 0.8], scale: 1.0 },
-    { model: `${KFURN}cabinet_small.glb`, position: [-2.9, 0, -3.35], scale: 0.8 },
-    { model: `${KFURN}shelf_B_small_decorated.glb`, position: [0.9, 0, -3.5], scale: 1.3 },
-    { model: `${KFURN}cactus_small_A.glb`, position: [-4.4, 0, -3.3], scale: 1.1 },
-    { model: `${KFURN}cactus_small_B.glb`, position: [4.4, 0, -3.3], scale: 1.1 },
+    // media wall: the TV itself is an interactive layout item above
+    { model: `${KFURN}cabinet_medium.glb`, position: [0, 0, -3.42], scale: 0.8 },
+    { model: `${KFURN}cabinet_small.glb`, position: [-2.1, 0, -3.42], scale: 0.8 },
+    // seating group facing the TV around the coffee table
+    { model: `${KFURN}table_low.glb`, position: [0, 0, -0.35] },
+    { model: `${KFURN}couch.glb`, position: [0, 0, 1.55], rotationY: Math.PI, scale: 0.85 },
+    { model: `${FURN}bear.glb`, position: [-0.85, 0.43, 1.6], rotationY: Math.PI, scale: 1.3, noCollide: true },
+    { model: `${KFURN}armchair.glb`, position: [-3.6, 0, 0.5], rotationY: 2.2, scale: 0.85 },
+    { model: `${KFURN}lamp_standing.glb`, position: [-4.35, 0, -1.0], scale: 0.8 },
+    { model: `${KFURN}table_small.glb`, position: [3.7, 0, 1.0], scale: 0.7 },
+    { model: `${KFURN}lamp_table.glb`, position: [3.7, 0.7, 1.0], scale: 0.5, noCollide: true },
+    { model: `${KFURN}cactus_small_A.glb`, position: [-4.4, 0, 3.3], scale: 1.1 },
+    { model: `${KFURN}cactus_small_B.glb`, position: [4.4, 0, 3.3], scale: 1.1 },
   ],
   education: [
-    { model: `${KFURN}rug_rectangle_A.glb`, position: [0, 0.005, 0.2], scale: 1.3, noCollide: true },
+    { model: `${KFURN}rug_rectangle_A.glb`, position: [0, 0.005, 0.5], scale: 1.3, noCollide: true },
     { model: `${KFURN}rug_rectangle_A.glb`, position: [0, 0.005, 3.3], scale: 0.55, noCollide: true },
-    { model: `${KFURN}book_set.glb`, position: [-2.3, 0.95, -2.9], scale: 0.7, noCollide: true },
-    { model: `${KFURN}shelf_B_small_decorated.glb`, position: [4.3, 0, -1.2], rotationY: -Math.PI / 2, scale: 1.3 },
-    { model: `${KFURN}chair_A.glb`, position: [3.2, 0, 1.8], rotationY: -2.2, scale: 0.82 },
-    { model: `${KFURN}lamp_standing.glb`, position: [-4.3, 0, 2.6], scale: 0.8 },
-    { model: `${KFURN}cactus_medium_A.glb`, position: [-4.4, 0, -3.3], scale: 1.1 },
+    // study desk with its chair
+    { model: `${KFURN}book_set.glb`, position: [-2.9, 0.975, -3.2], scale: 0.7, noCollide: true },
+    { model: `${KFURN}lamp_table.glb`, position: [-1.4, 0.8, -3.4], scale: 0.5, noCollide: true },
+    { model: `${KFURN}chair_A.glb`, position: [-2.2, 0, -2.0], rotationY: Math.PI + 0.15, scale: 0.82 },
+    // library corner
+    { model: `${FURN}bookcaseOpen.glb`, position: [4.0, 0, -3.5], scale: 2.4 },
+    { model: `${FURN}bookcaseOpen.glb`, position: [2.0, 0, -3.5], scale: 2.4 },
+    { model: `${KFURN}cactus_medium_A.glb`, position: [-4.2, 0, -3.3], scale: 1.1 },
+    // reading nook on the right wall
+    { model: `${KFURN}armchair.glb`, position: [3.8, 0, 0.9], rotationY: -Math.PI / 2 - 0.3, scale: 0.85 },
+    { model: `${KFURN}lamp_standing.glb`, position: [4.4, 0, 2.5], scale: 0.8 },
+    { model: `${KFURN}table_small.glb`, position: [4.3, 0, -1.0], scale: 0.7 },
+    { model: `${KFURN}lamp_standing.glb`, position: [-4.35, 0, 2.6], scale: 0.8 },
   ],
   experience: [
     { model: `${KFURN}rug_rectangle_stripes_A.glb`, position: [0, 0.005, 0.3], scale: 1.3, noCollide: true },
     { model: `${KFURN}rug_rectangle_A.glb`, position: [0, 0.005, 3.3], scale: 0.55, noCollide: true },
-    { model: `${FURN}computerScreen.glb`, position: [-2.3, 0.78, -2.9], scale: 1.8, noCollide: true },
-    { model: `${FURN}computerKeyboard.glb`, position: [-2.3, 0.78, -2.5], scale: 1.8, noCollide: true },
-    { model: `${KFURN}armchair.glb`, position: [-3.6, 0, -0.3], rotationY: 1.9, scale: 0.85 },
-    { model: `${FURN}speaker.glb`, position: [4.35, 0, -1], rotationY: -Math.PI / 2, scale: 1.7 },
-    { model: `${KFURN}lamp_standing.glb`, position: [4.3, 0, 2.6], scale: 0.8 },
+    // workstation on the desk (desk top at y≈0.80)
+    { model: `${FURN}computerScreen.glb`, position: [-2.2, 0.8, -3.4], scale: 1.8, noCollide: true },
+    { model: `${FURN}computerKeyboard.glb`, position: [-2.2, 0.8, -2.8], scale: 1.8, noCollide: true },
+    { model: `${FURN}laptop.glb`, position: [-3.2, 0.8, -3.0], rotationY: 0.3, scale: 2.0, noCollide: true },
+    { model: `${KFURN}chair_A.glb`, position: [-2.2, 0, -2.0], rotationY: Math.PI - 0.2, scale: 0.82 },
+    // cabinet with speakers
+    { model: `${FURN}speaker.glb`, position: [2.0, 0.8, -3.45], scale: 1.4, noCollide: true },
+    { model: `${FURN}speaker.glb`, position: [3.2, 0.8, -3.45], scale: 1.4, noCollide: true },
     { model: `${KFURN}cactus_small_A.glb`, position: [-4.4, 0, -3.3], scale: 1.1 },
+    { model: `${KFURN}lamp_standing.glb`, position: [4.4, 0, -3.3], scale: 0.8 },
+    // small meeting spot
+    { model: `${KFURN}table_small.glb`, position: [3.7, 0, 0.9], scale: 0.9 },
+    { model: `${KFURN}chair_B.glb`, position: [2.6, 0, 0.9], rotationY: Math.PI / 2, scale: 0.82 },
+    { model: `${KFURN}chair_B.glb`, position: [3.7, 0, 2.0], rotationY: Math.PI + 0.3, scale: 0.82 },
+    { model: `${KFURN}armchair.glb`, position: [-3.9, 0, 0.8], rotationY: Math.PI / 2, scale: 0.85 },
+    { model: `${KFURN}lamp_standing.glb`, position: [-4.4, 0, 2.7], scale: 0.8 },
   ],
   skills: [
     { model: `${KFURN}rug_rectangle_A.glb`, position: [0, 0.005, 0.4], scale: 1.25, noCollide: true },
     { model: `${KFURN}rug_rectangle_A.glb`, position: [0, 0.005, 3.3], scale: 0.55, noCollide: true },
-    { model: `${KFURN}table_medium.glb`, position: [-4.0, 0, 0.6], rotationY: Math.PI / 2, scale: 0.8 },
-    { model: `${FURN}laptop.glb`, position: [-4.0, 0.8, 0.6], rotationY: Math.PI / 2, scale: 2.0, noCollide: true },
-    { model: `${FURN}televisionVintage.glb`, position: [4.3, 0, 1.9], rotationY: -Math.PI / 2, scale: 2.1 },
-    { model: `${KFURN}chair_stool.glb`, position: [3.6, 0, 2.7], scale: 1.0 },
-    { model: `${KFURN}cactus_medium_A.glb`, position: [-4.4, 0, -3.3], scale: 1.1 },
+    // main workstation: long desk carrying screens, keyboard and chair
+    { model: `${KFURN}table_medium_long.glb`, position: [-0.4, 0, -3.02], scale: 0.8 },
+    { model: `${FURN}computerScreen.glb`, position: [0.4, 0.8, -3.3], scale: 1.9, noCollide: true },
+    { model: `${FURN}computerKeyboard.glb`, position: [-0.4, 0.8, -2.75], scale: 1.9, noCollide: true },
+    { model: `${KFURN}chair_C.glb`, position: [-0.4, 0, -2.0], rotationY: Math.PI + 0.1, scale: 0.82 },
+    // AI cabinet and backend rack accessories
+    { model: `${FURN}laptop.glb`, position: [4.2, 0.8, -3.42], scale: 2.0, noCollide: true },
+    { model: `${KFURN}cactus_small_A.glb`, position: [-4.4, 0, -1.6], scale: 1.1 },
+    // side workbench
+    { model: `${KFURN}table_medium_long.glb`, position: [-4.04, 0, 0.9], rotationY: Math.PI / 2, scale: 0.8 },
+    { model: `${FURN}laptop.glb`, position: [-4.0, 0.8, 0.9], rotationY: Math.PI / 2, scale: 2.0, noCollide: true },
+    { model: `${KFURN}chair_stool.glb`, position: [-2.9, 0, 0.9], rotationY: -Math.PI / 2, scale: 1.0 },
+    // retro TV corner
+    { model: `${KFURN}cabinet_small.glb`, position: [4.44, 0, 1.4], rotationY: -Math.PI / 2, scale: 0.8 },
+    { model: `${FURN}televisionVintage.glb`, position: [4.44, 0.8, 1.4], rotationY: -Math.PI / 2, scale: 2.1, noCollide: true },
+    { model: `${KFURN}lamp_standing.glb`, position: [-4.4, 0, 2.7], scale: 0.8 },
   ],
   projects: [
     { model: `${KFURN}rug_oval_A.glb`, position: [0, 0.005, 0.4], scale: 1.25, noCollide: true },
     { model: `${KFURN}rug_rectangle_A.glb`, position: [0, 0.005, 3.3], scale: 0.55, noCollide: true },
-    { model: `${KFURN}book_set.glb`, position: [-3, 0.68, -2.8], scale: 0.7, noCollide: true },
-    { model: `${KFURN}couch.glb`, position: [-4.0, 0, 0.8], rotationY: Math.PI / 2, scale: 0.85 },
-    { model: `${FURN}cardboardBoxClosed.glb`, position: [-4.3, 0, -3.3], scale: 1.6 },
-    { model: `${FURN}cardboardBoxOpen.glb`, position: [-3.3, 0, -3.4], scale: 1.5 },
-    { model: `${KFURN}lamp_standing.glb`, position: [4.3, 0, 2.7], scale: 0.8 },
-    { model: `${KFURN}cactus_small_B.glb`, position: [4.4, 0, -3.3], scale: 1.1 },
+    // exhibits on the three display tables (tops at y 0.8 / 0.9)
+    { model: `${FURN}laptop.glb`, position: [-3.2, 0.8, -3.0], rotationY: 0.2, scale: 2.4, noCollide: true },
+    { model: `${KFURN}book_set.glb`, position: [-3.9, 0.975, -2.6], scale: 0.5, noCollide: true },
+    { model: `${FURN}computerScreen.glb`, position: [0, 0.9, -3.45], scale: 1.6, noCollide: true },
+    { model: `${FURN}computerScreen.glb`, position: [3.2, 0.8, -3.3], scale: 1.9, noCollide: true },
+    { model: `${FURN}computerKeyboard.glb`, position: [3.2, 0.8, -2.7], scale: 1.9, noCollide: true },
+    // lounge area facing the exhibits
+    { model: `${KFURN}couch.glb`, position: [-4.12, 0, 1.2], rotationY: Math.PI / 2, scale: 0.85 },
+    { model: `${KFURN}table_low.glb`, position: [-2.45, 0, 1.2], rotationY: Math.PI / 2, scale: 0.8 },
+    { model: `${KFURN}lamp_standing.glb`, position: [-4.4, 0, 3.0], scale: 0.8 },
+    { model: `${KFURN}armchair.glb`, position: [3.9, 0, 0.7], rotationY: -Math.PI / 2, scale: 0.85 },
+    { model: `${KFURN}lamp_standing.glb`, position: [4.4, 0, 2.5], scale: 0.8 },
+    // storage boxes tucked in the front corner
+    { model: `${FURN}cardboardBoxClosed.glb`, position: [4.45, 0, 3.4], scale: 1.6 },
+    { model: `${FURN}cardboardBoxOpen.glb`, position: [3.85, 0, 3.45], scale: 1.5 },
+    { model: `${KFURN}cactus_small_B.glb`, position: [-4.4, 0, -3.3], scale: 1.1 },
   ],
   contact: [
     { model: `${KFURN}rug_oval_A.glb`, position: [0, 0.005, 0.5], scale: 1.25, noCollide: true },
     { model: `${KFURN}rug_rectangle_A.glb`, position: [0, 0.005, 3.3], scale: 0.55, noCollide: true },
-    // workstation on top of the interactive desk (its top sits at y≈0.80)
-    { model: `${FURN}computerScreen.glb`, position: [0, 0.8, -3.15], scale: 1.9, noCollide: true },
-    { model: `${FURN}computerKeyboard.glb`, position: [0, 0.8, -2.75], scale: 1.9, noCollide: true },
-    { model: `${KFURN}chair_A.glb`, position: [0.9, 0, -1.9], rotationY: -2.6, scale: 0.82 },
-    { model: `${KFURN}armchair.glb`, position: [-4.0, 0, 0.6], rotationY: Math.PI / 2, scale: 0.85 },
-    { model: `${KFURN}lamp_standing.glb`, position: [-4.3, 0, 2.5], scale: 0.8 },
-    { model: `${KFURN}table_small.glb`, position: [4.2, 0, 0.2], scale: 0.85 },
-    { model: `${KFURN}lamp_table.glb`, position: [4.2, 0.85, 0.2], scale: 0.55, noCollide: true },
-    { model: `${KFURN}cactus_small_A.glb`, position: [4.4, 0, -3.3], scale: 1.1 },
+    // reception desk workstation (desk top at y≈0.80)
+    { model: `${FURN}computerScreen.glb`, position: [0, 0.8, -3.3], scale: 1.9, noCollide: true },
+    { model: `${FURN}computerKeyboard.glb`, position: [0, 0.8, -2.7], scale: 1.9, noCollide: true },
+    { model: `${KFURN}lamp_table.glb`, position: [-0.95, 0.8, -3.4], scale: 0.5, noCollide: true },
+    { model: `${KFURN}chair_A.glb`, position: [0, 0, -2.0], rotationY: Math.PI + 0.2, scale: 0.82 },
+    // waiting corner
+    { model: `${KFURN}armchair.glb`, position: [-3.7, 0, 0.3], rotationY: Math.PI / 2 + 0.4, scale: 0.85 },
+    { model: `${KFURN}armchair.glb`, position: [3.7, 0, 0.3], rotationY: -Math.PI / 2 - 0.4, scale: 0.85 },
+    { model: `${KFURN}table_small.glb`, position: [0, 0, 0.5], scale: 0.6 },
+    { model: `${KFURN}lamp_standing.glb`, position: [-4.4, 0, -1.2], scale: 0.8 },
+    { model: `${KFURN}lamp_standing.glb`, position: [4.4, 0, -1.2], scale: 0.8 },
+    { model: `${KFURN}cactus_small_A.glb`, position: [-4.4, 0, -3.3], scale: 1.1 },
+    { model: `${KFURN}cactus_small_B.glb`, position: [4.4, 0, -3.3], scale: 1.1 },
   ],
 };

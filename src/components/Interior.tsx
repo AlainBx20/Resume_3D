@@ -1,6 +1,14 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import { Billboard, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
+import { audio } from "../audio";
+import TvScreen from "./TvScreen";
+import RoomExtras from "./Extras";
+import { RoomParts } from "./Repair";
+import { partItemId, partsInRoom } from "../parts";
+import { extraItemId, interiorExtras } from "../achievements";
+import { PAINT_H, PAINT_W, drawPainting } from "../paintings";
 import { buildings, interiorLayouts, interiorDecor, type SectionId } from "../content";
 import { useTownStore, type InteriorItem } from "../store";
 import FurnitureItem from "./FurnitureItem";
@@ -16,6 +24,7 @@ const DOORWAY_WIDTH = 2.4;
 const SIDE_WALL_WIDTH = (ROOM_WIDTH - DOORWAY_WIDTH) / 2;
 const SIDE_WALL_OFFSET = DOORWAY_WIDTH / 2 + SIDE_WALL_WIDTH / 2;
 const EXIT_POSITION: [number, number, number] = [0, 0, 3.6];
+const LIGHT_POSITION: [number, number, number] = [-1.9, 0, 3.6];
 const WOOD = "#5b4632";
 
 const ROOM_THEMES: Record<SectionId, { floor: string; trim: string; rugGlow: string }> = {
@@ -27,14 +36,14 @@ const ROOM_THEMES: Record<SectionId, { floor: string; trim: string; rugGlow: str
   contact: { floor: "#aa9672", trim: "#8d7938", rugGlow: "#ffe066" },
 };
 
-function InteractionMarker({ item, color }: { item: InteriorItem; color: string }) {
+function InteractionMarker({ item, color, labelY = 1.7 }: { item: InteriorItem; color: string; labelY?: number }) {
   return (
     <group position={[item.position[0], 0.025, item.position[2]]}>
       <mesh rotation-x={-Math.PI / 2}>
         <ringGeometry args={[0.42, 0.52, 32]} />
         <meshBasicMaterial color={color} transparent opacity={0.5} depthWrite={false} toneMapped={false} />
       </mesh>
-      <Billboard position={[0, 1.7, 0]}>
+      <Billboard position={[0, labelY, 0]}>
         <WorldText
           fontSize={0.13}
           maxWidth={3.2}
@@ -50,12 +59,60 @@ function InteractionMarker({ item, color }: { item: InteriorItem; color: string 
   );
 }
 
-// A framed picture on the wall, tinted with the section's accent color.
-function WallArt({ color, position, rotationY }: { color: string; position: [number, number, number]; rotationY: number }) {
-  const artColor = useMemo(
-    () => `#${new THREE.Color(color).lerp(new THREE.Color("#ffffff"), 0.35).getHexString()}`,
-    [color]
+// Fades the room between lit and dim when the wall switch is toggled.
+function RoomLights() {
+  const on = useTownStore((s) => s.roomLight);
+  const party = useTownStore((s) => s.partyOn);
+  const ambient = useRef<THREE.AmbientLight>(null);
+  const point = useRef<THREE.PointLight>(null);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (ambient.current) ambient.current.intensity += ((on ? 0.55 : 0.07) - ambient.current.intensity) * 0.12;
+    if (point.current) {
+      const target = party ? 18 + Math.sin(t * 8) * 8 : on ? 26 : 1.5;
+      point.current.intensity += (target - point.current.intensity) * 0.2;
+      if (party) point.current.color.setHSL((t * 0.6) % 1, 0.9, 0.6);
+      else point.current.color.set("#ffe8c4");
+    }
+  });
+  return (
+    <>
+      <ambientLight ref={ambient} intensity={0.55} color="#fff7e8" />
+      {/* physically-decaying light needs real power to carry a 10m room */}
+      <pointLight ref={point} position={[0, ROOM_HEIGHT - 0.75, 0]} intensity={26} color="#ffe8c4" distance={16} decay={2} castShadow />
+    </>
   );
+}
+
+function LightSwitchPlate() {
+  const on = useTownStore((s) => s.roomLight);
+  return (
+    <group position={[LIGHT_POSITION[0], 1.3, ROOM_DEPTH / 2 - 0.12]} rotation-y={Math.PI}>
+      <mesh>
+        <boxGeometry args={[0.14, 0.22, 0.02]} />
+        <meshStandardMaterial color="#f2efe8" roughness={0.6} />
+      </mesh>
+      <mesh position={[0, on ? 0.035 : -0.035, 0.02]}>
+        <boxGeometry args={[0.04, 0.07, 0.02]} />
+        <meshStandardMaterial color={on ? "#ffd24d" : "#b9b5ab"} emissive={on ? "#ffd24d" : "#000000"} emissiveIntensity={0.5} />
+      </mesh>
+    </group>
+  );
+}
+
+// A framed picture on the wall, painted to represent its room's story.
+function WallArt({ room, side, position, rotationY }: { room: SectionId; side: 0 | 1; position: [number, number, number]; rotationY: number }) {
+  const texture = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = PAINT_W;
+    canvas.height = PAINT_H;
+    const ctx = canvas.getContext("2d");
+    if (ctx) drawPainting(ctx, room, side);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  }, [room, side]);
+  useEffect(() => () => texture.dispose(), [texture]);
   return (
     <group position={position} rotation-y={rotationY}>
       <mesh>
@@ -64,7 +121,7 @@ function WallArt({ color, position, rotationY }: { color: string; position: [num
       </mesh>
       <mesh position={[0, 0, 0.03]}>
         <planeGeometry args={[0.98, 0.73]} />
-        <meshStandardMaterial color={artColor} emissive={artColor} emissiveIntensity={0.25} roughness={0.6} />
+        <meshStandardMaterial map={texture} emissiveMap={texture} emissive="#ffffff" emissiveIntensity={0.3} roughness={0.7} />
       </mesh>
     </group>
   );
@@ -110,23 +167,44 @@ export default function Interior({ id }: { id: SectionId }) {
 
   const lampClone = useMemo(() => ceilingLamp.clone(), [ceilingLamp]);
 
+  const radioOn = useTownStore((s) => s.radioOn);
+  const stars = useTownStore((s) => s.stars);
+  const foundParts = useTownStore((s) => s.parts);
+  const radioStation = useTownStore((s) => s.radioStation);
+  useEffect(() => {
+    audio.setRadio(radioOn, radioStation);
+  }, [radioOn, radioStation]);
+  useEffect(() => () => audio.setRadio(false, 0), []);
+
   useEffect(() => {
     const list: InteriorItem[] = items.map((it, i) => ({
       itemId: `${id}-${i}`,
       index: i,
       position: it.position,
       label: it.label,
+      kind: it.kind,
     }));
     list.push({ itemId: "__exit__", index: -1, position: EXIT_POSITION, label: "Exit" });
+    list.push({ itemId: "__light__", index: -2, position: LIGHT_POSITION, label: "Light switch", kind: "light" });
+    interiorExtras[id].forEach((extra, i) => {
+      const itemId = extraItemId(id, i);
+      if (extra.kind === "star" && stars.includes(itemId)) return;
+      list.push({ itemId, index: -10 - i, position: extra.position, label: extra.label, kind: extra.kind });
+    });
+    partsInRoom(id).forEach((p) => {
+      if (foundParts.includes(p.id)) return;
+      list.push({ itemId: partItemId(p.id), index: -30, position: [p.x, 0.4, p.z], label: p.label, kind: "part" });
+    });
     setInteriorItems(list);
     return () => setInteriorItems([]);
-  }, [id, items, setInteriorItems]);
+  }, [id, items, setInteriorItems, stars, foundParts]);
 
   return (
     <group>
-      <ambientLight intensity={0.55} color="#fff7e8" />
-      {/* physically-decaying light needs real power to carry a 10m room */}
-      <pointLight position={[0, ROOM_HEIGHT - 0.75, 0]} intensity={26} color="#ffe8c4" distance={16} decay={2} castShadow />
+      <RoomExtras id={id} />
+      <RoomParts room={id} />
+      <RoomLights />
+      <LightSwitchPlate />
 
       <mesh position={[0, 0, 0]} rotation-x={-Math.PI / 2} receiveShadow>
         <planeGeometry args={[ROOM_WIDTH, ROOM_DEPTH]} />
@@ -211,8 +289,8 @@ export default function Interior({ id }: { id: SectionId }) {
       {/* windows on the side walls, art on the back wall */}
       <Window position={[-ROOM_WIDTH / 2 + 0.12, 2.15, -1.2]} rotationY={Math.PI / 2} />
       <Window position={[ROOM_WIDTH / 2 - 0.12, 2.15, -1.2]} rotationY={-Math.PI / 2} />
-      <WallArt color={def.color} position={[-2.9, 2.5, -ROOM_DEPTH / 2 + 0.13]} rotationY={0} />
-      <WallArt color={def.color} position={[2.9, 2.5, -ROOM_DEPTH / 2 + 0.13]} rotationY={0} />
+      <WallArt room={id} side={0} position={[-2.9, 2.5, -ROOM_DEPTH / 2 + 0.13]} rotationY={0} />
+      <WallArt room={id} side={1} position={[2.9, 2.5, -ROOM_DEPTH / 2 + 0.13]} rotationY={0} />
 
       <mesh position={[EXIT_POSITION[0], 0.02, EXIT_POSITION[2]]} rotation-x={-Math.PI / 2}>
         <ringGeometry args={[0.5, 0.7, 24]} />
@@ -220,7 +298,7 @@ export default function Interior({ id }: { id: SectionId }) {
       </mesh>
 
       {/* real door filling the exit opening (was a black void) */}
-      <Doorway wallColor={wallColor} />
+      <Doorway wallColor={wallColor} sectionId={id} />
 
       {decor.map((it, i) => (
         <DecorItem key={`decor-${id}-${i}`} def={it} />
@@ -230,11 +308,16 @@ export default function Interior({ id }: { id: SectionId }) {
         <FurnitureItem key={`${id}-${i}`} def={it} />
       ))}
 
+      {items.map((it, i) =>
+        it.kind === "tv" ? <TvScreen key={`tv-${id}-${i}`} def={it} /> : null
+      )}
+
       {items.map((it, i) => (
         <InteractionMarker
           key={`marker-${id}-${i}`}
           item={{ itemId: `${id}-${i}`, index: i, position: it.position, label: it.label }}
           color={theme.rugGlow}
+          labelY={it.kind === "tv" ? 2.35 : 1.7}
         />
       ))}
     </group>

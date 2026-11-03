@@ -17,7 +17,7 @@ const uSnowWind = uniform(0);
 // Same trick as the rain: falling and side-to-side drift both live in the
 // position node, so the flurry is a single static draw call following the
 // camera. Ported from GLSL points to a TSL PointsNodeMaterial for WebGPU.
-export default function Snow() {
+export default function Snow({ anchor }: { anchor?: [number, number, number] } = {}) {
   const groupRef = useRef<THREE.Group>(null);
 
   const geometry = useMemo(() => {
@@ -79,7 +79,8 @@ export default function Snow() {
     uSnowOpacity.value = atm.snow * 0.9;
     uSnowWind.value = atm.wind;
     group.visible = atm.snow > 0.02;
-    group.position.set(state.camera.position.x, 0, state.camera.position.z);
+    if (anchor) group.position.set(...anchor);
+    else group.position.set(state.camera.position.x, 0, state.camera.position.z);
   });
 
   return (

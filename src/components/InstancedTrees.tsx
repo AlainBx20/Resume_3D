@@ -8,6 +8,7 @@ import { buildings } from "../content";
 import { atm } from "../atmosphere";
 import { mulberry32 } from "../rand";
 import { GROUND_RADIUS } from "./Ground";
+import { isOnTownRoad } from "../roads";
 
 const TREE_LARGE = "/models/suburban/tree-large.glb";
 const TREE_SMALL = "/models/suburban/tree-small.glb";
@@ -56,12 +57,11 @@ function generatePlacements(): Placement[] {
       for (let j = 0; j < clusterSize; j++) {
         const jitterAngle = rng() * Math.PI * 2;
         const jitterRadius = rng() * 3;
+        const x = centerX + Math.sin(jitterAngle) * jitterRadius;
+        const z = centerZ + Math.cos(jitterAngle) * jitterRadius;
+        if (isOnTownRoad(x, z, 1.3)) continue;
         list.push({
-          position: [
-            centerX + Math.sin(jitterAngle) * jitterRadius,
-            0,
-            centerZ + Math.cos(jitterAngle) * jitterRadius,
-          ],
+          position: [x, 0, z],
           scale: 4 + rng() * 3,
           rotationY: rng() * Math.PI * 2,
           model: models[Math.floor(rng() * models.length)],

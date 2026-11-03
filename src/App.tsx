@@ -6,6 +6,11 @@ import Scene from "./components/Scene";
 import Post from "./components/Post";
 import HUD from "./components/HUD";
 import SectionPanel from "./components/SectionPanel";
+import PropOverlay from "./components/PropOverlay";
+import { DuckDialog, VaultOverlay, CosmosVignette, IntroOverlay } from "./components/Overlays";
+import { ExtrasUI } from "./components/TownExtras";
+import { QuestWatcher, RelicPrompt, Journal } from "./components/QuestUI";
+import Toasts from "./components/Toasts";
 import "./App.css";
 
 // Merge the three/webgpu namespace (node materials + WebGPU classes) into the
@@ -43,10 +48,11 @@ function App() {
           // is accepted at runtime in fiber 9.8.
           return renderer as unknown as import("three").WebGLRenderer;
         }}
-        onCreated={({ gl }) => {
+        onCreated={({ gl, scene }) => {
           if (import.meta.env.DEV) {
             (window as unknown as { __renderer: THREE.WebGPURenderer }).__renderer =
               gl as unknown as THREE.WebGPURenderer;
+            (window as unknown as { __scene: THREE.Scene }).__scene = scene as unknown as THREE.Scene;
           }
         }}
         fallback={
@@ -64,6 +70,16 @@ function App() {
       <LoadingStatus />
       <HUD />
       <SectionPanel />
+      <PropOverlay />
+      <DuckDialog />
+      <CosmosVignette />
+      <IntroOverlay />
+      <VaultOverlay />
+      <QuestWatcher />
+      <RelicPrompt />
+      <ExtrasUI />
+      <Journal />
+      <Toasts />
     </div>
   );
 }

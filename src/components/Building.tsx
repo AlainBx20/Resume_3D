@@ -5,7 +5,6 @@ import * as THREE from "three";
 import type { BuildingDef } from "../content";
 import { registerCollider } from "../collision";
 import { atm } from "../atmosphere";
-import BuildingSign from "./BuildingSign";
 
 export default function Building({ def }: { def: BuildingDef }) {
   const { scene } = useGLTF(def.model);
@@ -35,7 +34,9 @@ export default function Building({ def }: { def: BuildingDef }) {
     group.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(group);
     setRoofTop(box.max.y);
-    box.expandByScalar(0.6);
+    // Keep collision close to the visible facade. The former 0.6m expansion
+    // produced a large invisible rectangle around every rotated building.
+    box.expandByScalar(0.1);
     return registerCollider(box);
   }, []);
 
@@ -66,8 +67,6 @@ export default function Building({ def }: { def: BuildingDef }) {
           <meshStandardMaterial color={def.color} emissive={def.color} emissiveIntensity={3} toneMapped={false} />
         </mesh>
       </group>
-
-      <BuildingSign def={def} />
     </>
   );
 }

@@ -2,19 +2,27 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useLoader, useFrame } from "@react-three/fiber";
 import { atm } from "../atmosphere";
+import { isOnTownRoad } from "../roads";
+import { insideBenchNook, nearestCarDistance } from "../streetLayout";
 
 const GROUND_RADIUS = 45;
 const PLAZA_RADIUS = 5;
 
 // fixed shallow pools that only appear (fade in) while the ground is wet
-const PUDDLE_SPOTS: { x: number; z: number; r: number }[] = [
+// Spots under cars, on the driving road or inside bench nooks are dropped.
+const PUDDLE_SPOTS = [
   { x: 1.6, z: 5.6, r: 1.3 },
   { x: -2.6, z: 4.8, r: 1.0 },
   { x: -5.8, z: 2.2, r: 1.4 },
   { x: 6.6, z: -3.5, r: 1.1 },
   { x: -2.4, z: -7.1, r: 1.2 },
   { x: 0.8, z: 13.5, r: 1.5 },
-];
+].filter(
+  (p) =>
+    !isOnTownRoad(p.x, p.z, p.r) &&
+    !insideBenchNook(p.x, p.z, p.r) &&
+    nearestCarDistance(p.x, p.z) > p.r + 3.2,
+);
 
 function useTiledTexture(path: string, repeat: number) {
   const tex = useLoader(THREE.TextureLoader, path);
@@ -120,7 +128,7 @@ export default function Ground() {
       {/* reflective puddles left behind by rain */}
       <group ref={puddleGroupRef} visible={false}>
         {PUDDLE_SPOTS.map((p, i) => (
-          <mesh key={i} rotation-x={-Math.PI / 2} position={[p.x, 0.035, p.z]}>
+          <mesh key={i} rotation-x={-Math.PI / 2} position={[p.x, 0.05, p.z]}>
             <circleGeometry args={[p.r, 24]} />
             <meshStandardMaterial
               color="#4a6485"

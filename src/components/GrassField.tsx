@@ -7,6 +7,9 @@ import { buildings } from "../content";
 import { atm } from "../atmosphere";
 import { mulberry32 } from "../rand";
 import { GROUND_RADIUS, PLAZA_RADIUS } from "./Ground";
+import { insidePondClearance } from "../landmarks";
+import { isOnTownRoad } from "../roads";
+import { insideBenchNook } from "../streetLayout";
 
 const BLADE_COUNT = 7000;
 const BLADE_HEIGHT = 0.52;
@@ -76,9 +79,14 @@ export default function GrassField() {
       const radius = PLAZA_RADIUS + 0.6 + Math.sqrt(rng()) * (GROUND_RADIUS - PLAZA_RADIUS - 3);
       // keep the radial pathways clear near the plaza
       if (radius < 13 && buildingAngles.some((ba) => angularDiff(angle, ba) < pathClearance)) continue;
+      const x = Math.sin(angle) * radius;
+      const z = Math.cos(angle) * radius;
+      if (insidePondClearance(x, z, 0.7)) continue;
+      if (isOnTownRoad(x, z, 0.35)) continue;
+      if (insideBenchNook(x, z, 0.35)) continue;
       list.push({
-        x: Math.sin(angle) * radius,
-        z: Math.cos(angle) * radius,
+        x,
+        z,
         scale: 0.7 + rng() * 0.8,
         rotY: rng() * Math.PI,
         phase: rng() * Math.PI * 2,

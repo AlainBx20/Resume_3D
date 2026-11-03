@@ -3,6 +3,7 @@ import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import type { FurnitureItemDef } from "../content";
 import { registerCollider } from "../collision";
+import Books from "./Books";
 
 // Kenney furniture is ~1 unit tall; scaled up so pieces read at human size
 // against the 10x8 room instead of dollhouse scale.
@@ -44,6 +45,7 @@ export default function FurnitureItem({ def }: { def: FurnitureItemDef }) {
   return (
     <group ref={groupRef} position={def.position} rotation-y={def.rotationY ?? 0} scale={def.scale ?? EXHIBIT_SCALE}>
       <primitive object={clone} />
+      {def.model.includes("bookcase") && <Books seed={Math.round(def.position[0] * 10 + 50)} />}
     </group>
   );
 }

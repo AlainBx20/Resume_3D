@@ -14,6 +14,7 @@ const uSnow = uniform(0);
 
 const material = new MeshBasicNodeMaterial();
 {
+  material.side = THREE.DoubleSide;
   const vy = uv().y.clamp(0, 1);
   const sky = mix(uHorizon, uZenith, vy);
 

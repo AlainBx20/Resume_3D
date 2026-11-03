@@ -3,6 +3,7 @@ import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import type { DecorItemDef } from "../content";
 import { registerCollider } from "../collision";
+import Books from "./Books";
 
 // Non-interactive interior prop. Kenney furniture models keep their origin at
 // a corner, so the clone is re-centered to make def.position the piece's
@@ -42,6 +43,7 @@ export default function DecorItem({ def }: { def: DecorItemDef }) {
       scale={def.scale ?? 1}
     >
       <primitive object={clone} />
+      {def.model.includes("bookcase") && <Books seed={Math.round(def.position[0] * 10 + 50)} />}
     </group>
   );
 }
