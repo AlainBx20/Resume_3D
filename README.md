@@ -121,3 +121,6 @@ the world font, HDR lighting, and procedural effects are all served locally.
 gltf-transform `KHR_mesh_quantization` (~40% smaller, and read natively by
 GLTFLoader with no decoder to ship). The two instanced tree models are left
 unquantized because `InstancedTrees` reuses their raw geometry directly.
+
+
+## 3D Architecture
